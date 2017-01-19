@@ -114,6 +114,7 @@ public class ImageBrowser {
                                 @Override
                                 public void onClick(View v) {
                                     ImageActivity.this.finish();
+                                    ImageActivity.this.overridePendingTransition(0, 0);
                                 }
                             });
 

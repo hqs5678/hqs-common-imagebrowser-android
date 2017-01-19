@@ -3,6 +3,7 @@ package com.hqs.imagebrowser_android;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.utils.SDCardUtils;
@@ -16,23 +17,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+    }
 
 
+    public void onClick(View view){
+        ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
+        ArrayList<String> filePaths = new ArrayList<>();
+        filePaths.add("http://d.hiphotos.baidu.com/image/pic/item/10dfa9ec8a136327a1de913a938fa0ec08fac78c.jpg");
 
-
-                ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
-                ArrayList<String> filePaths = new ArrayList<>();
-                filePaths.add("http://d.hiphotos.baidu.com/image/pic/item/10dfa9ec8a136327a1de913a938fa0ec08fac78c.jpg");
-
-                filePaths.add(SDCardUtils.getSDCardPath() + "000.jpg");
-                ImageBrowser.show(MainActivity.this, filePaths, 0);
-            }
-        }, 1000);
-
-
+        filePaths.add(SDCardUtils.getSDCardPath() + "000.jpg");
+        ImageBrowser.show(MainActivity.this, filePaths, 0);
     }
 }
