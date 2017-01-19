@@ -44,7 +44,7 @@ public class ImageBrowser {
 
             Intent intent = new Intent(activity, ImageActivity.class);
             intent.putExtra("filePaths", filePaths);
-            intent.putExtra("currentIndex", filePaths);
+            intent.putExtra("currentIndex", currentIndex);
 
             activity.startActivity(intent);
 
