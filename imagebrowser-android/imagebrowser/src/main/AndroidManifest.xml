@@ -3,7 +3,7 @@
     package="com.hqs.common.helper.imagebrowser">
 
     <application
-        android:allowBackup="true" android:name=".App">
+        android:allowBackup="true">
 
         <activity android:name=".ImageBrowser$ImageActivity" android:theme="@style/ImageBrowserTheme" />
 

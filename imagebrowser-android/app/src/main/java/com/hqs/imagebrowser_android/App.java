@@ -1,4 +1,4 @@
-package com.hqs.common.helper.imagebrowser;
+package com.hqs.imagebrowser_android;
 
 import android.app.Application;
 
