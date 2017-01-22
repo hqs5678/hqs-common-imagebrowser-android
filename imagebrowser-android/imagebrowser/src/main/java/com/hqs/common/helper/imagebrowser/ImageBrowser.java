@@ -2,6 +2,7 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -14,7 +15,9 @@ import android.widget.Toast;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.StatusBarUtil;
+import com.hqs.common.utils.ViewUtil;
 
 import java.util.ArrayList;
 
@@ -27,6 +30,7 @@ public class ImageBrowser {
 
     public static int placeHolderImageRes = -1;
     public static int backgroundColorRes = -1;
+    private static ArrayList<QImage> images;
 
     /**
      * show
@@ -52,6 +56,25 @@ public class ImageBrowser {
     }
 
 
+    public static void showWithImages(Activity activity, final ArrayList<QImage> images, final int currentIndex){
+
+        if (placeHolderImageRes == -1){
+            Toast.makeText(activity, "请设置占位图", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (images != null && images.size() > 0 && activity != null){
+
+            Intent intent = new Intent(activity, ImageActivity.class);
+            ImageBrowser.images = images;
+            intent.putExtra("currentIndex", currentIndex);
+
+            activity.startActivity(intent);
+
+        }
+    }
+
+
     public static class ImageActivity extends Activity {
 
         private ArrayList<String> filePaths;
@@ -69,8 +92,22 @@ public class ImageBrowser {
                 finish();
                 return;
             }
+
             filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
+
+            if (filePaths == null){
+                filePaths = new ArrayList<>();
+                for (QImage image : images){
+                    filePaths.add(image.filePath);
+                    ViewUtil.getViewRect(image.srcImageView, new ViewUtil.OnViewRectCallBack() {
+                        @Override
+                        public void onRect(RectF rectF) {
+                            Log.print(rectF);
+                        }
+                    });
+                }
+            }
 
             final View view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
             if (backgroundColorRes != -1){
@@ -80,8 +117,14 @@ public class ImageBrowser {
 
             final TextView tvIndex = (TextView) view.findViewById(R.id.tv_index);
             tvIndex.setText(currentIndex + 1 + "/" + filePaths.size());
-
             ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
+
+            setupViewPager(viewPager, tvIndex);
+
+        }
+
+        private void setupViewPager(ViewPager viewPager, final TextView tvIndex) {
+
             viewPager.setAdapter(new PagerAdapter() {
 
                 ArrayList<PhotoView> views = new ArrayList<PhotoView>();
