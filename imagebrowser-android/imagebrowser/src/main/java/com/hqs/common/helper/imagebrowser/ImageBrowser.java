@@ -3,7 +3,6 @@ package com.hqs.common.helper.imagebrowser;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.RectF;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
@@ -94,6 +93,8 @@ public class ImageBrowser {
         private ViewPager viewPager;
         private TextView tvIndex;
         private Handler mHandler;
+        private int sw;
+        private int sh;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +108,9 @@ public class ImageBrowser {
                 finish();
                 return;
             }
+            sw = (int) ScreenUtils.screenW(this);
+            sh = (int) ScreenUtils.screenH(this);
+
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
@@ -132,7 +136,7 @@ public class ImageBrowser {
             contentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    finish();
+                    onFinish();
                 }
             });
 
@@ -149,17 +153,19 @@ public class ImageBrowser {
                 final ImageView imgView = images.get(currentIndex).srcImageView;
                 ViewUtil.getViewRect(imgView, new ViewUtil.OnViewRectCallBack() {
                     @Override
-                    public void onRect(RectF rectF) {
-                        addAnimation(rectF, imgView);
+                    public void onRect(final RectF rectF) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                addAnimationEnter(rectF, imgView);
+                            }
+                        });
                     }
                 });
             }
-
-
-
         }
 
-        private void addAnimation(RectF rectF, ImageView srcImgView){
+        private void addAnimationEnter(RectF rectF, ImageView srcImgView){
             final ImageView imageView = new ImageView(this);
             imageView.setImageDrawable(srcImgView.getDrawable());
 
@@ -171,14 +177,14 @@ public class ImageBrowser {
             float fx = rectF.left;
             float tx = 0;
             float fy = rectF.top;
-            float h = rectF.width() * ScreenUtils.screenW(this) / rectF.height();
-            float ty = (ScreenUtils.screenH(this) - h) * 0.5f;
+            float h = rectF.width() * sw / rectF.height();
+            float ty = (sh - h) * 0.5f;
 
             int duration = 300;
             Animation translateAnimation = new TranslateAnimation(fx, tx, fy, ty);
             translateAnimation.setDuration(duration);
 
-            float scale = ScreenUtils.screenW(this)/rectF.width();
+            float scale = sw/rectF.width();
 
 
             ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
@@ -203,6 +209,7 @@ public class ImageBrowser {
                         @Override
                         public void run() {
                             contentView.removeView(imageView);
+                            contentView.setEnabled(true);
                         }
                     }, 200);
 
@@ -251,15 +258,14 @@ public class ImageBrowser {
                             // 启用图片缩放功能
                             photoView.enable();
                             photoView.setAnimaDuring(300);
-                            photoView.setMaxScale(3);
+                            photoView.setMaxScale(5);
                             photoView.setInterpolator(new DecelerateInterpolator());
                             photoView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
                             photoView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    ImageActivity.this.finish();
-                                    ImageActivity.this.overridePendingTransition(0, 0);
+                                    ImageActivity.this.onFinish();
                                 }
                             });
 
@@ -299,6 +305,7 @@ public class ImageBrowser {
                 @Override
                 public void onPageSelected(int position) {
                     tvIndex.setText(position + 1 + "/" + filePaths.size());
+                    currentIndex = position;
                 }
 
                 @Override
@@ -308,6 +315,72 @@ public class ImageBrowser {
             });
 
             viewPager.setCurrentItem(currentIndex);
+        }
+
+
+        private void onFinish(){
+            // 添加动画
+            if (images != null && images.size() > 0){
+                final ImageView imageView = images.get(currentIndex).srcImageView;
+                ViewUtil.getViewRect(imageView, new ViewUtil.OnViewRectCallBack() {
+                    @Override
+                    public void onRect(final RectF rectF) {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                addAnimationExit(rectF);
+                            }
+                        });
+
+                    }
+                });
+            }
+            else {
+                finish();
+            }
+        }
+
+        private void addAnimationExit(RectF rectF){
+
+            contentView.clearAnimation();
+
+            int duration = 2000;
+            float scale = rectF.width()/sw;
+            TranslateAnimation translateAnimation = new TranslateAnimation(0,
+                    rectF.left, viewPager.getTop(), rectF.top - ScreenUtils.getStatusHeight(this));
+
+
+            ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
+
+            AnimationSet animationSet = new AnimationSet(true);
+            animationSet.addAnimation(scaleAnimation);
+            animationSet.addAnimation(translateAnimation);
+            animationSet.setDuration(duration);
+            animationSet.setFillAfter(true);
+            viewPager.setAnimation(animationSet);
+            animationSet.start();
+
+            Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+            fade.setDuration(duration);
+            fade.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    contentView.setEnabled(false);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    finish();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            contentView.setAnimation(fade);
+            fade.start();
+
         }
 
         @Override
