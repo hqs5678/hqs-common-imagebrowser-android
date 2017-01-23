@@ -51,7 +51,7 @@ public class ImageBrowser {
             intent.putExtra("currentIndex", currentIndex);
 
             activity.startActivity(intent);
-
+            activity.overridePendingTransition(0, 0);
         }
     }
 
@@ -70,6 +70,7 @@ public class ImageBrowser {
             intent.putExtra("currentIndex", currentIndex);
 
             activity.startActivity(intent);
+            activity.overridePendingTransition(0, 0);
 
         }
     }
@@ -200,6 +201,12 @@ public class ImageBrowser {
             });
 
             viewPager.setCurrentItem(currentIndex);
+        }
+
+        @Override
+        public void finish() {
+            super.finish();
+            overridePendingTransition(0, 0);
         }
     }
 
