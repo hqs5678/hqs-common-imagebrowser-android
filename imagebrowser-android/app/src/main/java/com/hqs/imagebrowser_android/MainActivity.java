@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showImg(int index){
         ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
-
+        ImageBrowser.backgroundColorRes = R.color.colorAccent;
 
         QImage image;
         ArrayList<QImage> arrayList = new ArrayList<>();
