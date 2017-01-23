@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
-import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -120,12 +119,6 @@ public class ImageBrowser {
                 filePaths = new ArrayList<>();
                 for (QImage image : images){
                     filePaths.add(image.filePath);
-                    ViewUtil.getViewRect(image.srcImageView, new ViewUtil.OnViewRectCallBack() {
-                        @Override
-                        public void onRect(RectF rectF) {
-                            Log.print(rectF);
-                        }
-                    });
                 }
             }
 
