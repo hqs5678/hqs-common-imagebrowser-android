@@ -1,7 +1,5 @@
 package com.hqs.common.helper.imagebrowser;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.widget.ImageView;
 
 /**
