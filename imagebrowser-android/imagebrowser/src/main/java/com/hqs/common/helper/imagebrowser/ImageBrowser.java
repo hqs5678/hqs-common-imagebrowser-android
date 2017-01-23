@@ -1,13 +1,16 @@
 package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -89,12 +92,12 @@ public class ImageBrowser {
 
         private ArrayList<String> filePaths;
         private int currentIndex;
-        private RelativeLayout contentView;
+        private ContentView contentView;
         private ViewPager viewPager;
         private TextView tvIndex;
         private Handler mHandler;
-        private int sw;
-        private int sh;
+        private float sw;
+        private float sh;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -108,8 +111,8 @@ public class ImageBrowser {
                 finish();
                 return;
             }
-            sw = (int) ScreenUtils.screenW(this);
-            sh = (int) ScreenUtils.screenH(this);
+            sw = ScreenUtils.screenW(this);
+            sh = ScreenUtils.screenH(this);
 
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
@@ -128,7 +131,7 @@ public class ImageBrowser {
                 }
             }
 
-            contentView = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
+            contentView = (ContentView) LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
             if (backgroundColorRes != -1){
                 contentView.setBackgroundResource(backgroundColorRes);
             }
@@ -347,7 +350,7 @@ public class ImageBrowser {
             int duration = 2000;
             float scale = rectF.width()/sw;
             TranslateAnimation translateAnimation = new TranslateAnimation(0,
-                    rectF.left, viewPager.getTop(), rectF.top - ScreenUtils.getStatusHeight(this));
+                    rectF.left, viewPager.getTop(), rectF.top);
 
 
             ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
@@ -358,7 +361,6 @@ public class ImageBrowser {
             animationSet.setDuration(duration);
             animationSet.setFillAfter(true);
             viewPager.setAnimation(animationSet);
-            animationSet.start();
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
             fade.setDuration(duration);
@@ -379,7 +381,6 @@ public class ImageBrowser {
                 }
             });
             contentView.setAnimation(fade);
-            fade.start();
 
         }
 
@@ -389,6 +390,8 @@ public class ImageBrowser {
             overridePendingTransition(0, 0);
         }
     }
+
+
 
 
 }
