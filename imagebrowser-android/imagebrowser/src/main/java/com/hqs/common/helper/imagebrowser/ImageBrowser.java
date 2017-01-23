@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -92,6 +93,7 @@ public class ImageBrowser {
         private RelativeLayout contentView;
         private ViewPager viewPager;
         private TextView tvIndex;
+        private Handler mHandler;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +107,7 @@ public class ImageBrowser {
                 finish();
                 return;
             }
-
+            mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
 
@@ -158,13 +160,8 @@ public class ImageBrowser {
         }
 
         private void addAnimation(RectF rectF, ImageView srcImgView){
-            ImageView imageView = new ImageView(this);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                imageView.setBackground(srcImgView.getDrawable());
-            }
-            else {
-                imageView.setBackgroundDrawable(srcImgView.getDrawable());
-            }
+            final ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(srcImgView.getDrawable());
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) rectF.width(), (int) rectF.height());
             imageView.setLayoutParams(layoutParams);
@@ -193,7 +190,29 @@ public class ImageBrowser {
             animationSet.addAnimation(translateAnimation);
             animationSet.setFillAfter(true);
             imageView.setAnimation(animationSet);
-            animationSet.start();
+            animationSet.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    contentView.setEnabled(false);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    setupViewPager();
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            contentView.removeView(imageView);
+                        }
+                    }, 200);
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
 
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
@@ -234,6 +253,7 @@ public class ImageBrowser {
                             photoView.setAnimaDuring(300);
                             photoView.setMaxScale(3);
                             photoView.setInterpolator(new DecelerateInterpolator());
+                            photoView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
                             photoView.setOnClickListener(new View.OnClickListener() {
                                 @Override
