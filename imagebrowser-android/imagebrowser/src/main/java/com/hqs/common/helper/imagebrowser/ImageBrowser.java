@@ -347,11 +347,11 @@ public class ImageBrowser {
 
             contentView.clearAnimation();
 
-            int duration = 2000;
+            int duration = 400;
             float scale = rectF.width()/sw;
+            float d = (sh * scale - rectF.height()) * 0.5f;
             TranslateAnimation translateAnimation = new TranslateAnimation(0,
-                    rectF.left, viewPager.getTop(), rectF.top);
-
+                    rectF.left, viewPager.getTop(), rectF.top - d);
 
             ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
 
@@ -380,6 +380,7 @@ public class ImageBrowser {
 
                 }
             });
+            fade.setFillAfter(true);
             contentView.setAnimation(fade);
 
         }
