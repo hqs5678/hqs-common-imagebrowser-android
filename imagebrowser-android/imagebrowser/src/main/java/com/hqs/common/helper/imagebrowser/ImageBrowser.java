@@ -1,16 +1,14 @@
 package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -166,6 +164,31 @@ public class ImageBrowser {
                     }
                 });
             }
+            else{
+                setupViewPager();
+                Animation animation = AnimationUtils.loadAnimation(this,android.R.anim.fade_in);
+                animation.setDuration(200);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        contentView.setEnabled(false);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        contentView.setEnabled(true);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                contentView.clearAnimation();
+                contentView.setAnimation(animation);
+            }
+
         }
 
         private void addAnimationEnter(RectF rectF, ImageView srcImgView){
@@ -339,7 +362,28 @@ public class ImageBrowser {
                 });
             }
             else {
-                finish();
+                Animation animation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+                animation.setDuration(300);
+                animation.setFillAfter(true);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        contentView.setEnabled(false);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        finish();
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                contentView.clearAnimation();
+                contentView.setAnimation(animation);
             }
         }
 
@@ -347,7 +391,7 @@ public class ImageBrowser {
 
             contentView.clearAnimation();
 
-            int duration = 300;
+            int duration = 250;
             float scale = rectF.width()/sw;
             float d = (sh * scale - rectF.height()) * 0.5f;
             TranslateAnimation translateAnimation = new TranslateAnimation(0,
@@ -389,6 +433,22 @@ public class ImageBrowser {
         public void finish() {
             super.finish();
             overridePendingTransition(0, 0);
+        }
+
+        @Override
+        protected void onDestroy() {
+            images = null;
+            backgroundColorRes = -1;
+            placeHolderImageRes = -1;
+            super.onDestroy();
+        }
+
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK){
+                return true;
+            }
+            return super.onKeyDown(keyCode, event);
         }
     }
 
