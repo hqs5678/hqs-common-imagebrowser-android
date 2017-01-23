@@ -3,19 +3,28 @@ package com.hqs.common.helper.imagebrowser;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
 import com.hqs.common.utils.Log;
+import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
 
@@ -80,6 +89,9 @@ public class ImageBrowser {
 
         private ArrayList<String> filePaths;
         private int currentIndex;
+        private RelativeLayout contentView;
+        private ViewPager viewPager;
+        private TextView tvIndex;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -110,21 +122,90 @@ public class ImageBrowser {
                 }
             }
 
-            final View view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
+            contentView = (RelativeLayout) LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
             if (backgroundColorRes != -1){
-                view.setBackgroundResource(backgroundColorRes);
+                contentView.setBackgroundResource(backgroundColorRes);
             }
-            this.setContentView(view);
+            this.setContentView(contentView);
+            contentView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
 
-            final TextView tvIndex = (TextView) view.findViewById(R.id.tv_index);
+            tvIndex = (TextView) contentView.findViewById(R.id.tv_index);
             tvIndex.setText(currentIndex + 1 + "/" + filePaths.size());
-            ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
+            viewPager = (ViewPager) contentView.findViewById(R.id.viewPager);
 
-            setupViewPager(viewPager, tvIndex);
+            setup();
+        }
+
+        private void setup(){
+            // 先完成动画, 再显示所有, 设置viewpager
+            if (images != null && images.size() > 0) {
+                final ImageView imgView = images.get(currentIndex).srcImageView;
+                ViewUtil.getViewRect(imgView, new ViewUtil.OnViewRectCallBack() {
+                    @Override
+                    public void onRect(RectF rectF) {
+                        addAnimation(rectF, imgView);
+                    }
+                });
+            }
+
+
 
         }
 
-        private void setupViewPager(ViewPager viewPager, final TextView tvIndex) {
+        private void addAnimation(RectF rectF, ImageView srcImgView){
+            ImageView imageView = new ImageView(this);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                imageView.setBackground(srcImgView.getDrawable());
+            }
+            else {
+                imageView.setBackgroundDrawable(srcImgView.getDrawable());
+            }
+
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) rectF.width(), (int) rectF.height());
+            imageView.setLayoutParams(layoutParams);
+
+            contentView.addView(imageView);
+
+            float fx = rectF.left;
+            float tx = 0;
+            float fy = rectF.top;
+            float h = rectF.width() * ScreenUtils.screenW(this) / rectF.height();
+            float ty = (ScreenUtils.screenH(this) - h) * 0.5f;
+
+            int duration = 300;
+            Animation translateAnimation = new TranslateAnimation(fx, tx, fy, ty);
+            translateAnimation.setDuration(duration);
+
+            float scale = ScreenUtils.screenW(this)/rectF.width();
+
+
+            ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
+            scaleAnimation.setDuration(duration);
+
+
+            AnimationSet animationSet = new AnimationSet(true);
+            animationSet.addAnimation(scaleAnimation);
+            animationSet.addAnimation(translateAnimation);
+            animationSet.setFillAfter(true);
+            imageView.setAnimation(animationSet);
+            animationSet.start();
+
+
+            Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+            fade.setDuration(duration);
+
+            contentView.setAnimation(fade);
+
+
+
+        }
+
+        private void setupViewPager() {
 
             viewPager.setAdapter(new PagerAdapter() {
 
@@ -169,7 +250,13 @@ public class ImageBrowser {
                     photoView = views.get(position % maxViews);
 
                     String path = filePaths.get(position);
-                    Glide.with(ImageActivity.this).load(path).placeholder(placeHolderImageRes).into(photoView);
+                    if (images == null){
+                        Glide.with(ImageActivity.this).load(path).placeholder(placeHolderImageRes).into(photoView);
+                    }
+                    else{
+                        Glide.with(ImageActivity.this).load(path).placeholder(images.get(position).srcImageView.getDrawable()).into(photoView);
+                    }
+
 
                     container.addView(photoView);
 

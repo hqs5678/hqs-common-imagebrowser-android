@@ -24,16 +24,15 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
 
         if (view instanceof ImageView) {
-            ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
-
-
-            QImage image = new QImage();
-            image.srcImageView = (ImageView) findViewById(R.id.image);
-
-            ArrayList<QImage> arrayList = new ArrayList<>();
-            arrayList.add(image);
-
-            ImageBrowser.showWithImages(this, arrayList, 0);
+            if (view.getId() == R.id.image2){
+                showImg(2);
+            }
+            else if (view.getId() == R.id.imageView0){
+                showImg(0);
+            }
+            else if (view.getId() == R.id.imageView1){
+                showImg(1);
+            }
         } else {
             ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
             ArrayList<String> filePaths = new ArrayList<>();
@@ -44,5 +43,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+    }
+
+
+    private void showImg(int index){
+        ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
+
+
+        QImage image;
+        ArrayList<QImage> arrayList = new ArrayList<>();
+
+        image = new QImage();
+        image.srcImageView = (ImageView) findViewById(R.id.imageView0);
+        arrayList.add(image);
+
+        image = new QImage();
+        image.srcImageView = (ImageView) findViewById(R.id.imageView1);
+        arrayList.add(image);
+
+        image = new QImage();
+        image.srcImageView = (ImageView) findViewById(R.id.image2);
+        arrayList.add(image);
+
+        ImageBrowser.showWithImages(this, arrayList, index);
     }
 }
