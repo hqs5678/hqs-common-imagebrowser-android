@@ -183,7 +183,7 @@ public class ImageBrowser {
             float h = rectF.width() * sw / rectF.height();
             float ty = (sh - h) * 0.5f;
 
-            int duration = 300;
+            int duration = 200;
             Animation translateAnimation = new TranslateAnimation(fx, tx, fy, ty);
             translateAnimation.setDuration(duration);
 
@@ -347,7 +347,7 @@ public class ImageBrowser {
 
             contentView.clearAnimation();
 
-            int duration = 400;
+            int duration = 300;
             float scale = rectF.width()/sw;
             float d = (sh * scale - rectF.height()) * 0.5f;
             TranslateAnimation translateAnimation = new TranslateAnimation(0,
