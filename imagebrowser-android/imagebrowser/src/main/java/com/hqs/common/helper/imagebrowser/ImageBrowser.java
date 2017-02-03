@@ -96,6 +96,7 @@ public class ImageBrowser {
         private ArrayList<String> filePaths;
         private int currentIndex;
         private ContentView contentView;
+        private RelativeLayout bgView;
         private ViewPager viewPager;
         private TextView tvIndex;
         private Handler mHandler;
@@ -161,8 +162,9 @@ public class ImageBrowser {
             }
 
             contentView = (ContentView) LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
+            bgView = (RelativeLayout) contentView.findViewById(R.id.content_bg_view);
             if (backgroundColorRes != -1){
-                contentView.setBackgroundResource(backgroundColorRes);
+                bgView.setBackgroundResource(backgroundColorRes);
             }
             this.setContentView(contentView);
             contentView.setOnClickListener(new View.OnClickListener() {
@@ -216,8 +218,8 @@ public class ImageBrowser {
                     }
                 });
 
-                contentView.clearAnimation();
-                contentView.setAnimation(animation);
+                bgView.clearAnimation();
+                bgView.setAnimation(animation);
             }
 
         }
@@ -282,7 +284,7 @@ public class ImageBrowser {
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
             fade.setDuration(duration);
 
-            contentView.setAnimation(fade);
+            bgView.setAnimation(fade);
 
 
 
@@ -415,14 +417,14 @@ public class ImageBrowser {
                     }
                 });
 
-                contentView.clearAnimation();
-                contentView.setAnimation(animation);
+                bgView.clearAnimation();
+                bgView.setAnimation(animation);
             }
         }
 
         private void addAnimationExit(RectF rectF){
 
-            contentView.clearAnimation();
+            bgView.clearAnimation();
 
             int duration = 250;
             float scale = rectF.width()/sw;
@@ -458,7 +460,7 @@ public class ImageBrowser {
                 }
             });
             fade.setFillAfter(true);
-            contentView.setAnimation(fade);
+            bgView.setAnimation(fade);
 
         }
 
