@@ -466,8 +466,8 @@ public class ImageBrowser {
             if (keyCode == KeyEvent.KEYCODE_BACK){
                 if (contentView.isEnabled()){
                     onFinish();
-                    return true;
                 }
+                return true;
             }
             return super.onKeyDown(keyCode, event);
         }
