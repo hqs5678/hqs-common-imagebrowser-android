@@ -292,8 +292,7 @@ public class ImageBrowser {
 
             viewPager.setAdapter(new PagerAdapter() {
 
-                LinkedList<PhotoView> views = new LinkedList<PhotoView>();
-                int maxViews = 6;
+                ArrayList<PhotoView> views = new ArrayList<PhotoView>();
                 @Override
                 public int getCount() {
                     return filePaths.size();
@@ -307,23 +306,7 @@ public class ImageBrowser {
                 @Override
                 public Object instantiateItem(ViewGroup container, int position) {
 
-                    PhotoView photoView;
-                    if (views.size() == 0){
-                        for (int i = 0; i< maxViews; i ++){
-                            photoView = new PhotoView(ImageActivity.this);
-
-                            // 启用图片缩放功能
-                            photoView.enable();
-                            photoView.setAnimaDuring(300);
-                            photoView.setMaxScale(5);
-                            photoView.setInterpolator(new DecelerateInterpolator());
-                            photoView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
-                            views.add(photoView);
-                        }
-
-                    }
-                    photoView = views.get(position % maxViews);
+                    PhotoView photoView = getView(position);
                     photoView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -348,6 +331,27 @@ public class ImageBrowser {
                 @Override
                 public void destroyItem(ViewGroup container, int position, Object object) {
                     container.removeView((View) object);
+                }
+
+                private PhotoView getView(int position){
+
+                    if (views.size() == 0 || position + 1 > views.size()){
+                        PhotoView photoView;
+                        for (int i = views.size(); i < position + 1; i ++){
+                            photoView = new PhotoView(ImageActivity.this);
+
+                            // 启用图片缩放功能
+                            photoView.enable();
+                            photoView.setAnimaDuring(300);
+                            photoView.setMaxScale(5);
+                            photoView.setInterpolator(new DecelerateInterpolator());
+                            photoView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+                            views.add(photoView);
+                        }
+                    }
+
+                    return views.get(position);
                 }
 
             });
