@@ -2,17 +2,13 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.RectF;
-import android.hardware.SensorManager;
-import android.media.ExifInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -28,13 +24,11 @@ import android.widget.Toast;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
-import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**
  * Created by apple on 2016/11/3.
@@ -102,48 +96,12 @@ public class ImageBrowser {
         private Handler mHandler;
         private float sw;
         private float sh;
-        private boolean orientationChanged = false;
-        private int orientation = -1;
-        private int preOrientation = -1;
-
-        private OrientationEventListener mScreenOrientationEventListener;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-
-            if (this.mScreenOrientationEventListener == null){
-                this.mScreenOrientationEventListener = new OrientationEventListener(this) {
-                    @Override
-                    public void onOrientationChanged(int i) {
-                        // i的范围是0～359
-                        // 屏幕左边在顶部的时候 i = 90;
-                        // 屏幕顶部在底部的时候 i = 180;
-                        // 屏幕右边在底部的时候 i = 270;
-                        // 正常情况默认i = 0;
-
-                        if(45 <= i && i < 135) {
-                            orientation = ExifInterface.ORIENTATION_ROTATE_180;
-                        } else if(135 <= i && i < 225) {
-                            orientation = ExifInterface.ORIENTATION_ROTATE_270;
-                        } else if(225 <= i && i < 315) {
-                            orientation = ExifInterface.ORIENTATION_NORMAL;
-                        } else {
-                            orientation = ExifInterface.ORIENTATION_ROTATE_90;
-                        }
-
-                        if (orientation != preOrientation){
-                            orientationChanged = true;
-                            preOrientation = orientation;
-                        }
-                    }
-                };
-
-                this.mScreenOrientationEventListener.enable();
-            }
-
-
+            ScreenUtils.setScreenOrientationPortrait(this);
             StatusBarUtil.transparencyBar(this);
 
             Bundle extras = this.getIntent().getExtras();
@@ -158,7 +116,6 @@ public class ImageBrowser {
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
-            orientationChanged = extras.getBoolean("orientationChanged");
 
             if (filePaths == null){
                 filePaths = new ArrayList<>();
@@ -188,12 +145,6 @@ public class ImageBrowser {
         }
 
         private void setup(){
-
-            if (orientationChanged){
-                setupViewPager();
-                orientationChanged = false;
-                return;
-            }
 
             // 先完成动画, 再显示所有, 设置viewpager
             if (images != null && images.size() > 0) {
@@ -252,22 +203,34 @@ public class ImageBrowser {
             float h = rectF.width() * sw / rectF.height();
             float ty = (sh - h) * 0.5f;
 
-            int duration = 200;
-            Animation translateAnimation = new TranslateAnimation(fx, tx, fy, ty);
-            translateAnimation.setDuration(duration);
+
 
             float scale = sw/rectF.width();
+            float scaleH = sh/rectF.height();
 
+            ScaleAnimation scaleAnimation;
+            Animation translateAnimation;
+            if (scale < scaleH){
+                scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
+                translateAnimation = new TranslateAnimation(fx, tx, fy, ty);
+            }
+            else {
+                scaleAnimation = new ScaleAnimation(1, scaleH, 1, scaleH, 0, 0);
+                float w = rectF.height() * sh / rectF.width();
+                tx = (sw - w) * 0.5f;
+                translateAnimation = new TranslateAnimation(fx, tx, fy, 0);
+            }
 
-            ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
+            int duration = 200;
             scaleAnimation.setDuration(duration);
-
+            translateAnimation.setDuration(duration);
 
             AnimationSet animationSet = new AnimationSet(true);
             animationSet.addAnimation(scaleAnimation);
             animationSet.addAnimation(translateAnimation);
             animationSet.setFillAfter(true);
             imageView.setAnimation(animationSet);
+
             animationSet.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
@@ -283,7 +246,7 @@ public class ImageBrowser {
                             contentView.removeView(imageView);
                             contentView.setEnabled(true);
                         }
-                    }, 200);
+                    }, 250);
 
                 }
 
@@ -321,7 +284,11 @@ public class ImageBrowser {
                 @Override
                 public Object instantiateItem(ViewGroup container, int position) {
 
-                    PhotoView photoView = getView(position);
+                    final PhotoView photoView = getView(position);
+
+
+
+
                     photoView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -336,6 +303,8 @@ public class ImageBrowser {
                     else{
                         Glide.with(ImageActivity.this).load(path).placeholder(images.get(position).srcImageView.getDrawable()).into(photoView);
                     }
+
+
 
 
                     container.addView(photoView);
@@ -486,15 +455,9 @@ public class ImageBrowser {
 
         @Override
         protected void onDestroy() {
-            if (!orientationChanged){
-                images = null;
-                backgroundColorRes = -1;
-                placeHolderImageRes = -1;
-                mScreenOrientationEventListener.disable();
-            }
-            else{
-                getIntent().putExtra("orientationChanged", true);
-            }
+            images = null;
+            backgroundColorRes = -1;
+            placeHolderImageRes = -1;
             super.onDestroy();
         }
 
