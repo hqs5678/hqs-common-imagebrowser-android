@@ -5,7 +5,8 @@
     <application
         android:allowBackup="true">
 
-        <activity android:name=".ImageBrowser$ImageActivity" android:theme="@style/ImageBrowserTheme" />
+        <activity android:name=".ImageBrowser$ImageActivity" android:theme="@style/ImageBrowserTheme"
+            android:screenOrientation="portrait"/>
 
     </application>
 
