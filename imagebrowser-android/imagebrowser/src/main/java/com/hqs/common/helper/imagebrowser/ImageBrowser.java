@@ -2,13 +2,17 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.RectF;
+import android.hardware.SensorManager;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -24,11 +28,13 @@ import android.widget.Toast;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by apple on 2016/11/3.
@@ -95,10 +101,42 @@ public class ImageBrowser {
         private Handler mHandler;
         private float sw;
         private float sh;
+        private int orientation = -1;
+
+        OrientationEventListener mScreenOrientationEventListener;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
+            if (this.mScreenOrientationEventListener == null){
+                this.mScreenOrientationEventListener = new OrientationEventListener(this) {
+                    @Override
+                    public void onOrientationChanged(int i) {
+                        // i的范围是0～359
+                        // 屏幕左边在顶部的时候 i = 90;
+                        // 屏幕顶部在底部的时候 i = 180;
+                        // 屏幕右边在底部的时候 i = 270;
+                        // 正常情况默认i = 0;
+
+                        if(45 <= i && i < 135) {
+                            orientation = ExifInterface.ORIENTATION_ROTATE_180;
+                        } else if(135 <= i && i < 225) {
+                            orientation = ExifInterface.ORIENTATION_ROTATE_270;
+                        } else if(225 <= i && i < 315) {
+                            orientation = ExifInterface.ORIENTATION_NORMAL;
+                        } else {
+                            orientation = ExifInterface.ORIENTATION_ROTATE_90;
+                        }
+                    }
+                };
+
+
+                this.mScreenOrientationEventListener.enable();
+            }
+
+
+
 
             StatusBarUtil.transparencyBar(this);
 
@@ -254,8 +292,8 @@ public class ImageBrowser {
 
             viewPager.setAdapter(new PagerAdapter() {
 
-                ArrayList<PhotoView> views = new ArrayList<PhotoView>();
-                int maxViews = 4;
+                LinkedList<PhotoView> views = new LinkedList<PhotoView>();
+                int maxViews = 6;
                 @Override
                 public int getCount() {
                     return filePaths.size();
@@ -281,18 +319,17 @@ public class ImageBrowser {
                             photoView.setInterpolator(new DecelerateInterpolator());
                             photoView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
-                            photoView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    ImageActivity.this.onFinish();
-                                }
-                            });
-
                             views.add(photoView);
                         }
 
                     }
                     photoView = views.get(position % maxViews);
+                    photoView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ImageActivity.this.onFinish();
+                        }
+                    });
 
                     String path = filePaths.get(position);
                     if (images == null){
@@ -335,7 +372,6 @@ public class ImageBrowser {
 
             viewPager.setCurrentItem(currentIndex);
         }
-
 
         private void onFinish(){
             // 添加动画
@@ -430,9 +466,11 @@ public class ImageBrowser {
 
         @Override
         protected void onDestroy() {
-            images = null;
-            backgroundColorRes = -1;
-            placeHolderImageRes = -1;
+            if (orientation == -1){
+                images = null;
+                backgroundColorRes = -1;
+                placeHolderImageRes = -1;
+            }
             super.onDestroy();
         }
 
