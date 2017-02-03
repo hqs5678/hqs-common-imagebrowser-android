@@ -102,13 +102,16 @@ public class ImageBrowser {
         private Handler mHandler;
         private float sw;
         private float sh;
+        private boolean orientationChanged = false;
         private int orientation = -1;
+        private int preOrientation = -1;
 
-        OrientationEventListener mScreenOrientationEventListener;
+        private OrientationEventListener mScreenOrientationEventListener;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
 
             if (this.mScreenOrientationEventListener == null){
                 this.mScreenOrientationEventListener = new OrientationEventListener(this) {
@@ -129,14 +132,16 @@ public class ImageBrowser {
                         } else {
                             orientation = ExifInterface.ORIENTATION_ROTATE_90;
                         }
+
+                        if (orientation != preOrientation){
+                            orientationChanged = true;
+                            preOrientation = orientation;
+                        }
                     }
                 };
 
-
                 this.mScreenOrientationEventListener.enable();
             }
-
-
 
 
             StatusBarUtil.transparencyBar(this);
@@ -153,6 +158,7 @@ public class ImageBrowser {
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
+            orientationChanged = extras.getBoolean("orientationChanged");
 
             if (filePaths == null){
                 filePaths = new ArrayList<>();
@@ -182,6 +188,13 @@ public class ImageBrowser {
         }
 
         private void setup(){
+
+            if (orientationChanged){
+                setupViewPager();
+                orientationChanged = false;
+                return;
+            }
+
             // 先完成动画, 再显示所有, 设置viewpager
             if (images != null && images.size() > 0) {
                 final ImageView imgView = images.get(currentIndex).srcImageView;
@@ -218,8 +231,8 @@ public class ImageBrowser {
                     }
                 });
 
-                bgView.clearAnimation();
-                bgView.setAnimation(animation);
+                contentView.clearAnimation();
+                contentView.setAnimation(animation);
             }
 
         }
@@ -380,6 +393,7 @@ public class ImageBrowser {
         }
 
         private void onFinish(){
+
             // 添加动画
             if (images != null && images.size() > 0){
                 final ImageView imageView = images.get(currentIndex).srcImageView;
@@ -417,8 +431,8 @@ public class ImageBrowser {
                     }
                 });
 
-                bgView.clearAnimation();
-                bgView.setAnimation(animation);
+                contentView.clearAnimation();
+                contentView.setAnimation(animation);
             }
         }
 
@@ -472,10 +486,14 @@ public class ImageBrowser {
 
         @Override
         protected void onDestroy() {
-            if (orientation == -1){
+            if (!orientationChanged){
                 images = null;
                 backgroundColorRes = -1;
                 placeHolderImageRes = -1;
+                mScreenOrientationEventListener.disable();
+            }
+            else{
+                getIntent().putExtra("orientationChanged", true);
             }
             super.onDestroy();
         }
