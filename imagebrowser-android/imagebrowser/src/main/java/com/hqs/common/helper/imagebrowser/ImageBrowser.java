@@ -439,7 +439,10 @@ public class ImageBrowser {
         @Override
         public boolean onKeyDown(int keyCode, KeyEvent event) {
             if (keyCode == KeyEvent.KEYCODE_BACK){
-                return true;
+                if (contentView.isEnabled()){
+                    onFinish();
+                    return true;
+                }
             }
             return super.onKeyDown(keyCode, event);
         }
