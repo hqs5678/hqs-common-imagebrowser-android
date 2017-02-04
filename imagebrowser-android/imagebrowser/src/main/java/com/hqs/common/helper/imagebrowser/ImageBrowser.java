@@ -412,9 +412,6 @@ public class ImageBrowser {
 
         private void addAnimationExit(RectF rectF){
 
-            bgView.clearAnimation();
-
-
             int duration = 200;
 
             PhotoView photoView = views.get(currentIndex);
@@ -449,6 +446,8 @@ public class ImageBrowser {
                 }
             });
             fade.setFillAfter(true);
+
+            bgView.clearAnimation();
             bgView.setAnimation(fade);
 
         }
