@@ -414,11 +414,14 @@ public class ImageBrowser {
 
             bgView.clearAnimation();
 
+
+            int duration = 200;
+
             PhotoView photoView = views.get(currentIndex);
-            Info i = new Info(rectF, rectF,
-                    new RectF(0.0f, 0.0f, sw, sh), rectF, new PointF(sw * 0.5f, sh * 0.5f),
+            Info i = new Info(rectF, rectF, new RectF(0.0f, 0.0f, sw, sh), rectF,
+                    new PointF(sw * 0.5f, sh * 0.5f),
                     photoView.getScaleX(), 0, ImageView.ScaleType.FIT_CENTER);
-            photoView.setAnimaDuring(200);
+            photoView.setAnimaDuring(duration);
             photoView.animaTo(i, new Runnable() {
                 @Override
                 public void run() {
@@ -426,10 +429,9 @@ public class ImageBrowser {
                 }
             });
 
-            int duration = 250;
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-            fade.setDuration(duration);
+            fade.setDuration(duration + 50);
             fade.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
