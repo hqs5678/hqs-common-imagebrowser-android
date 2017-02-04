@@ -2,6 +2,7 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,8 +23,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -96,6 +99,8 @@ public class ImageBrowser {
         private Handler mHandler;
         private float sw;
         private float sh;
+
+        private ArrayList<PhotoView> views = new ArrayList<PhotoView>();
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -270,7 +275,7 @@ public class ImageBrowser {
 
             viewPager.setAdapter(new PagerAdapter() {
 
-                ArrayList<PhotoView> views = new ArrayList<PhotoView>();
+
                 @Override
                 public int getCount() {
                     return filePaths.size();
@@ -409,20 +414,19 @@ public class ImageBrowser {
 
             bgView.clearAnimation();
 
+            PhotoView photoView = views.get(currentIndex);
+            Info i = new Info(rectF, rectF,
+                    new RectF(0.0f, 0.0f, sw, sh), rectF, new PointF(sw * 0.5f, sh * 0.5f),
+                    photoView.getScaleX(), 0, ImageView.ScaleType.FIT_CENTER);
+            photoView.setAnimaDuring(200);
+            photoView.animaTo(i, new Runnable() {
+                @Override
+                public void run() {
+
+                }
+            });
+
             int duration = 250;
-            float scale = rectF.width()/sw;
-            float d = (sh * scale - rectF.height()) * 0.5f;
-            TranslateAnimation translateAnimation = new TranslateAnimation(0,
-                    rectF.left, viewPager.getTop(), rectF.top - d);
-
-            ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
-
-            AnimationSet animationSet = new AnimationSet(true);
-            animationSet.addAnimation(scaleAnimation);
-            animationSet.addAnimation(translateAnimation);
-            animationSet.setDuration(duration);
-            animationSet.setFillAfter(true);
-            viewPager.setAnimation(animationSet);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
             fade.setDuration(duration);
