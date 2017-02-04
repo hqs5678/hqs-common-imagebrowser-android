@@ -3,12 +3,12 @@ package com.hqs.imagebrowser_android;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
 
+import com.bm.library.PhotoView;
 import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.helper.imagebrowser.QImage;
 import com.hqs.common.utils.SDCardUtils;
+import com.hqs.common.utils.ScreenUtils;
 
 import java.util.ArrayList;
 
@@ -17,6 +17,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ScreenUtils.setScreenOrientationPortrait(this);
         setContentView(R.layout.activity_main);
 
 
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClick(View view) {
 
-        if (view instanceof ImageView) {
+        if (view instanceof PhotoView) {
             if (view.getId() == R.id.image2){
                 showImg(2);
             }
@@ -90,19 +92,19 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<QImage> arrayList = new ArrayList<>();
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.imageView0);
+        image.srcImageView = (PhotoView) findViewById(R.id.imageView0);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.imageView1);
+        image.srcImageView = (PhotoView) findViewById(R.id.imageView1);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image2);
+        image.srcImageView = (PhotoView) findViewById(R.id.image2);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image3);
+        image.srcImageView = (PhotoView) findViewById(R.id.image3);
         arrayList.add(image);
 
 
@@ -118,43 +120,43 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<QImage> arrayList = new ArrayList<>();
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image10);
+        image.srcImageView = (PhotoView) findViewById(R.id.image10);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image11);
+        image.srcImageView = (PhotoView) findViewById(R.id.image11);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image12);
+        image.srcImageView = (PhotoView) findViewById(R.id.image12);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image13);
+        image.srcImageView = (PhotoView) findViewById(R.id.image13);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image14);
+        image.srcImageView = (PhotoView) findViewById(R.id.image14);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image15);
+        image.srcImageView = (PhotoView) findViewById(R.id.image15);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image16);
+        image.srcImageView = (PhotoView) findViewById(R.id.image16);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image17);
+        image.srcImageView = (PhotoView) findViewById(R.id.image17);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image18);
+        image.srcImageView = (PhotoView) findViewById(R.id.image18);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (ImageView) findViewById(R.id.image19);
+        image.srcImageView = (PhotoView) findViewById(R.id.image19);
         arrayList.add(image);
 
         ImageBrowser.showWithImages(this, arrayList, index);

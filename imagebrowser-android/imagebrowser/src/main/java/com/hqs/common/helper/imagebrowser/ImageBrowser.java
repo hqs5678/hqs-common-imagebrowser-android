@@ -2,7 +2,6 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,11 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,11 +22,11 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
-import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 /**
@@ -99,6 +95,7 @@ public class ImageBrowser {
         private Handler mHandler;
         private float sw;
         private float sh;
+        private ImageView.ScaleType scaleType = ImageView.ScaleType.FIT_CENTER;
 
         private ArrayList<PhotoView> views = new ArrayList<PhotoView>();
 
@@ -153,7 +150,7 @@ public class ImageBrowser {
 
             // 先完成动画, 再显示所有, 设置viewpager
             if (images != null && images.size() > 0) {
-                final ImageView imgView = images.get(currentIndex).srcImageView;
+                final PhotoView imgView = images.get(currentIndex).srcImageView;
                 ViewUtil.getViewRect(imgView, new ViewUtil.OnViewRectCallBack() {
                     @Override
                     public void onRect(final RectF rectF) {
@@ -193,57 +190,35 @@ public class ImageBrowser {
 
         }
 
-        private void addAnimationEnter(RectF rectF, ImageView srcImgView){
-            final ImageView imageView = new ImageView(this);
+        private void addAnimationEnter(RectF rectF, PhotoView srcImgView){
+            final PhotoView imageView = new PhotoView(this);
             imageView.setImageDrawable(srcImgView.getDrawable());
+            imageView.setScaleType(scaleType);
 
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) rectF.width(), (int) rectF.height());
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) sw, (int) sh);
             imageView.setLayoutParams(layoutParams);
 
             contentView.addView(imageView);
 
-            float fx = rectF.left;
-            float tx = 0;
-            float fy = rectF.top;
-            float h = rectF.width() * sw / rectF.height();
-            float ty = (sh - h) * 0.5f;
-
-
-
-            float scale = sw/rectF.width();
-            float scaleH = sh/rectF.height();
-
-            ScaleAnimation scaleAnimation;
-            Animation translateAnimation;
-            if (scale < scaleH){
-                scaleAnimation = new ScaleAnimation(1, scale, 1, scale, 0, 0);
-                translateAnimation = new TranslateAnimation(fx, tx, fy, ty);
-            }
-            else {
-                scaleAnimation = new ScaleAnimation(1, scaleH, 1, scaleH, 0, 0);
-                float w = rectF.height() * sh / rectF.width();
-                tx = (sw - w) * 0.5f;
-                translateAnimation = new TranslateAnimation(fx, tx, fy, 0);
-            }
-
             int duration = 200;
-            scaleAnimation.setDuration(duration);
-            translateAnimation.setDuration(duration);
 
-            AnimationSet animationSet = new AnimationSet(true);
-            animationSet.addAnimation(scaleAnimation);
-            animationSet.addAnimation(translateAnimation);
-            animationSet.setFillAfter(true);
-            imageView.setAnimation(animationSet);
+            Info info = srcImgView.getInfo();
 
-            animationSet.setAnimationListener(new Animation.AnimationListener() {
+            try {
+                Class cls = info.getClass();
+                Field f = cls.getDeclaredField("mRect");
+                f.setAccessible(true);
+                f.set(info, rectF);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+            imageView.setAnimaDuring(duration);
+            imageView.animaFrom(info);
+            mHandler.postDelayed(new Runnable() {
                 @Override
-                public void onAnimationStart(Animation animation) {
-                    contentView.setEnabled(false);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
+                public void run() {
                     setupViewPager();
                     mHandler.postDelayed(new Runnable() {
                         @Override
@@ -252,15 +227,8 @@ public class ImageBrowser {
                             contentView.setEnabled(true);
                         }
                     }, 250);
-
                 }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
+            }, duration + 50);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
             fade.setDuration(duration);
@@ -332,9 +300,9 @@ public class ImageBrowser {
                             // 启用图片缩放功能
                             photoView.enable();
                             photoView.setAnimaDuring(300);
-                            photoView.setMaxScale(5);
+                            photoView.setMaxScale(6);
                             photoView.setInterpolator(new DecelerateInterpolator());
-                            photoView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                            photoView.setScaleType(scaleType);
 
                             views.add(photoView);
                         }
@@ -370,14 +338,14 @@ public class ImageBrowser {
 
             // 添加动画
             if (images != null && images.size() > 0){
-                final ImageView imageView = images.get(currentIndex).srcImageView;
+                final PhotoView imageView = images.get(currentIndex).srcImageView;
                 ViewUtil.getViewRect(imageView, new ViewUtil.OnViewRectCallBack() {
                     @Override
                     public void onRect(final RectF rectF) {
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                addAnimationExit(rectF);
+                                addAnimationExit(rectF, imageView);
                             }
                         });
 
@@ -410,16 +378,33 @@ public class ImageBrowser {
             }
         }
 
-        private void addAnimationExit(RectF rectF){
+        private void addAnimationExit(RectF rectF, PhotoView srcImageView){
 
             int duration = 200;
 
             PhotoView photoView = views.get(currentIndex);
-            Info i = new Info(rectF, rectF, new RectF(0.0f, 0.0f, sw, sh), rectF,
-                    new PointF(sw * 0.5f, sh * 0.5f),
-                    photoView.getScaleX(), 0, ImageView.ScaleType.FIT_CENTER);
+
+            Info info = srcImageView.getInfo();
+            try {
+                Class cls = info.getClass();
+                Field fImg = cls.getDeclaredField("mImgRect");
+                fImg.setAccessible(true);
+                RectF imgRect = (RectF) fImg.get(info);
+
+                Field f = cls.getDeclaredField("mRect");
+                f.setAccessible(true);
+                RectF mRect = (RectF) f.get(info);
+
+                float d = rectF.top + imgRect.top;
+                float h = mRect.height();
+                mRect.top = d;
+                mRect.bottom = d + h;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             photoView.setAnimaDuring(duration);
-            photoView.animaTo(i, new Runnable() {
+            photoView.animaTo(info, new Runnable() {
                 @Override
                 public void run() {
 
@@ -428,7 +413,7 @@ public class ImageBrowser {
 
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-            fade.setDuration(duration + 50);
+            fade.setDuration(duration);
             fade.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
