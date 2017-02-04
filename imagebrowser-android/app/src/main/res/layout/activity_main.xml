@@ -27,7 +27,8 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:onClick="onClick"
-        android:src="@mipmap/avatar"
+        android:src="@mipmap/ad"
+        android:scaleType="centerCrop"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
