@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         image.srcImageView = (PhotoView) findViewById(R.id.image3);
         arrayList.add(image);
 
-
+        ImageBrowser.animDuration = 2000;
         ImageBrowser.showWithImages(this, arrayList, index);
     }
 

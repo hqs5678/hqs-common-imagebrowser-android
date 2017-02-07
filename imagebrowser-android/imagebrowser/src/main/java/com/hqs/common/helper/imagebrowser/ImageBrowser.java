@@ -38,6 +38,7 @@ public class ImageBrowser {
 
     public static int placeHolderImageRes = -1;
     public static int backgroundColorRes = -1;
+    public static int animDuration = 200;
     private static ArrayList<QImage> images;
 
     /**
@@ -166,7 +167,7 @@ public class ImageBrowser {
             else{
                 setupViewPager();
                 Animation animation = AnimationUtils.loadAnimation(this,android.R.anim.fade_in);
-                animation.setDuration(200);
+                animation.setDuration(animDuration);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
@@ -200,8 +201,6 @@ public class ImageBrowser {
 
             contentView.addView(imageView);
 
-            int duration = 200;
-
             Info info = srcImgView.getInfo();
 
             try {
@@ -214,7 +213,7 @@ public class ImageBrowser {
             }
 
 
-            imageView.setAnimaDuring(duration);
+            imageView.setAnimaDuring(animDuration);
             imageView.animaFrom(info);
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -226,12 +225,12 @@ public class ImageBrowser {
                             contentView.removeView(imageView);
                             contentView.setEnabled(true);
                         }
-                    }, 250);
+                    }, 300);
                 }
-            }, duration + 50);
+            }, animDuration + 50);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-            fade.setDuration(duration);
+            fade.setDuration(animDuration);
 
             bgView.setAnimation(fade);
 
@@ -354,7 +353,7 @@ public class ImageBrowser {
             }
             else {
                 Animation animation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-                animation.setDuration(300);
+                animation.setDuration(animDuration + 100);
                 animation.setFillAfter(true);
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -380,8 +379,6 @@ public class ImageBrowser {
 
         private void addAnimationExit(RectF rectF, PhotoView srcImageView){
 
-            int duration = 200;
-
             PhotoView photoView = views.get(currentIndex);
 
             Info info = srcImageView.getInfo();
@@ -403,7 +400,7 @@ public class ImageBrowser {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            photoView.setAnimaDuring(duration);
+            photoView.setAnimaDuring(animDuration);
             photoView.animaTo(info, new Runnable() {
                 @Override
                 public void run() {
@@ -413,7 +410,7 @@ public class ImageBrowser {
 
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-            fade.setDuration(duration);
+            fade.setDuration(animDuration);
             fade.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
