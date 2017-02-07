@@ -120,7 +120,7 @@ public class ImageBrowser {
             filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
 
-            if (filePaths == null){
+            if (filePaths == null && images != null) {
                 filePaths = new ArrayList<>();
                 for (QImage image : images){
                     filePaths.add(image.filePath);
@@ -217,19 +217,42 @@ public class ImageBrowser {
 
             imageView.setAnimaDuring(animDuration);
             imageView.animaFrom(info);
+
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     setupViewPager();
-                    mHandler.postDelayed(new Runnable() {
+                }
+            }, animDuration + 50);
+
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Animation fade = AnimationUtils.loadAnimation(ImageActivity.this, android.R.anim.fade_out);
+                    fade.setDuration(100);
+                    fade.setFillAfter(true);
+                    fade.setAnimationListener(new Animation.AnimationListener() {
                         @Override
-                        public void run() {
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
                             contentView.removeView(imageView);
                             contentView.setEnabled(true);
                         }
-                    }, 300);
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                    imageView.clearAnimation();
+                    imageView.setAnimation(fade);
+                    fade.start();
                 }
-            }, animDuration + 50);
+            }, animDuration + 350);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
             fade.setDuration(animDuration);
