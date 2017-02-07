@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.bm.library.PhotoView;
+import com.bumptech.glide.Glide;
 import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.helper.imagebrowser.QImage;
 import com.hqs.common.utils.SDCardUtils;
@@ -93,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
 
         image = new QImage();
         image.srcImageView = (PhotoView) findViewById(R.id.imageView0);
+        Glide.with(this).load("http://www.7x24home.com/upload/pics/beijing/2017/01/19/WX20160520991978SM991986/2017-01-19-103423564841.png")
+                .into((PhotoView) findViewById(R.id.imageView0));
+        image.filePath = "http://www.7x24home.com/upload/pics/beijing/2017/01/19/WX20160520991978SM991986/2017-01-19-103423564841.png";
         arrayList.add(image);
 
         image = new QImage();
@@ -107,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         image.srcImageView = (PhotoView) findViewById(R.id.image3);
         arrayList.add(image);
 
-        ImageBrowser.animDuration = 2000;
+        ImageBrowser.animDuration = 400;
         ImageBrowser.showWithImages(this, arrayList, index);
     }
 

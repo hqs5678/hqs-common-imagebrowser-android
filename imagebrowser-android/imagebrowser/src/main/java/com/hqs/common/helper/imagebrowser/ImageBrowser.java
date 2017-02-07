@@ -128,6 +128,7 @@ public class ImageBrowser {
             }
 
             contentView = (ContentView) LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
+            contentView.setEnabled(false);
             bgView = (RelativeLayout) contentView.findViewById(R.id.content_bg_view);
             if (backgroundColorRes != -1){
                 bgView.setBackgroundResource(backgroundColorRes);
@@ -136,6 +137,7 @@ public class ImageBrowser {
             contentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    contentView.setEnabled(false);
                     onFinish();
                 }
             });
@@ -193,7 +195,7 @@ public class ImageBrowser {
 
         private void addAnimationEnter(RectF rectF, PhotoView srcImgView){
             final PhotoView imageView = new PhotoView(this);
-            Glide.with(ImageActivity.this).load(images.get(currentIndex).filePath).placeholder(srcImgView.getDrawable()).into(imageView);
+            Glide.with(ImageActivity.this).load(images.get(currentIndex).filePath).placeholder(srcImgView.getDrawable()).animate(android.R.anim.fade_in).into(imageView);
             imageView.setScaleType(scaleType);
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) sw, (int) sh);
@@ -379,6 +381,9 @@ public class ImageBrowser {
 
         private void addAnimationExit(RectF rectF, PhotoView srcImageView){
 
+            if (views.size() == 0){
+                return;
+            }
             PhotoView photoView = views.get(currentIndex);
 
             Info info = srcImageView.getInfo();
@@ -400,7 +405,7 @@ public class ImageBrowser {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            photoView.setAnimaDuring(animDuration);
+            photoView.setAnimaDuring(animDuration + 50);
             photoView.animaTo(info, new Runnable() {
                 @Override
                 public void run() {
@@ -452,6 +457,7 @@ public class ImageBrowser {
         public boolean onKeyDown(int keyCode, KeyEvent event) {
             if (keyCode == KeyEvent.KEYCODE_BACK){
                 if (contentView.isEnabled()){
+                    contentView.setEnabled(false);
                     onFinish();
                 }
                 return true;
