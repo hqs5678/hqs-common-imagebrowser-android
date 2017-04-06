@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version = '1.1.8'
-def vc = 22
+version = '1.1.10'
+def vc = 24
 
 
 android {
@@ -28,7 +28,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.hqs.common:hqs-common:1.0.26'
+    compile 'com.hqs.common:hqs-common:1.1.1'
     compile 'com.bm.photoview:library:1.4.1'
     compile 'com.github.bumptech.glide:glide:3.7.0'
 }
