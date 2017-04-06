@@ -10,6 +10,7 @@ import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.helper.imagebrowser.QImage;
 import com.hqs.common.utils.SDCardUtils;
 import com.hqs.common.utils.ScreenUtils;
+import com.hqs.common.utils.SharedPreferenceUtil;
 
 import java.util.ArrayList;
 
@@ -21,8 +22,6 @@ public class MainActivity extends AppCompatActivity {
 
         ScreenUtils.setScreenOrientationPortrait(this);
         setContentView(R.layout.activity_main);
-
-
 
 
     }
@@ -119,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
     private void showImg1(int index){
         ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
         ImageBrowser.backgroundColorRes = R.color.colorAccent;
+        ImageBrowser.animDuration = 2000;
 
         QImage image;
         ArrayList<QImage> arrayList = new ArrayList<>();
