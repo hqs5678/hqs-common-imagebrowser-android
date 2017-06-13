@@ -229,7 +229,7 @@ public class ImageBrowser {
                 @Override
                 public void run() {
                     Animation fade = AnimationUtils.loadAnimation(ImageActivity.this, android.R.anim.fade_out);
-                    fade.setDuration(100);
+                    fade.setDuration(300);
                     fade.setFillAfter(true);
                     fade.setAnimationListener(new Animation.AnimationListener() {
                         @Override
@@ -252,7 +252,7 @@ public class ImageBrowser {
                     imageView.setAnimation(fade);
                     fade.start();
                 }
-            }, animDuration + 350);
+            }, animDuration + 50);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
             fade.setDuration(animDuration);
@@ -295,10 +295,16 @@ public class ImageBrowser {
 
                     String path = filePaths.get(position);
                     if (images == null){
-                        Glide.with(ImageActivity.this).load(path).placeholder(placeHolderImageRes).into(photoView);
+                        Glide.with(ImageActivity.this)
+                                .load(path)
+                                .placeholder(placeHolderImageRes)
+                                .into(photoView);
                     }
                     else{
-                        Glide.with(ImageActivity.this).load(path).placeholder(images.get(position).srcImageView.getDrawable()).into(photoView);
+                        Glide.with(ImageActivity.this)
+                                .load(path)
+                                .placeholder(images.get(position).srcImageView.getDrawable())
+                                .into(photoView);
                     }
 
 
