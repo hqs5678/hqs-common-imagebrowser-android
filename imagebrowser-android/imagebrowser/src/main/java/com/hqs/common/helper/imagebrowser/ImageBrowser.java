@@ -252,7 +252,7 @@ public class ImageBrowser {
                     imageView.setAnimation(fade);
                     fade.start();
                 }
-            }, animDuration + 50);
+            }, animDuration + 400);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
             fade.setDuration(animDuration);
