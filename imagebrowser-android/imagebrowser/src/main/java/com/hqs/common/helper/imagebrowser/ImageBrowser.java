@@ -6,14 +6,19 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,6 +34,7 @@ import com.hqs.common.utils.ViewUtil;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by apple on 2016/11/3.
@@ -95,11 +101,13 @@ public class ImageBrowser {
         private ViewPager viewPager;
         private TextView tvIndex;
         private Handler mHandler;
+        private MyPageAdapter adapter;
         private float sw;
         private float sh;
         private ImageView.ScaleType scaleType = ImageView.ScaleType.FIT_CENTER;
-
-        private ArrayList<PhotoView> views = new ArrayList<PhotoView>();
+        private float startY;
+        private float viewY;
+        private boolean animating = false;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +154,33 @@ public class ImageBrowser {
             tvIndex = (TextView) contentView.findViewById(R.id.tv_index);
             tvIndex.setText(currentIndex + 1 + "/" + filePaths.size());
             viewPager = (ViewPager) contentView.findViewById(R.id.viewPager);
+
+
+            contentView.setInterceptListener(new InterceptListener() {
+                @Override
+                public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+                    if (ev.getPointerCount() == 1){
+                        PhotoView photoView = adapter.getView(viewPager.getCurrentItem());
+                        Info info = photoView.getInfo();
+
+                        try {
+                            Class cls = info.getClass();
+                            Field field = cls.getDeclaredField("mScale");
+                            field.setAccessible(true);
+
+                            float scale = (float) field.get(info);
+                            if (scale == 1.0){
+                                return onGesture(ev);
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return false;
+                }
+            });
 
             setup();
         }
@@ -265,84 +300,8 @@ public class ImageBrowser {
         }
 
         private void setupViewPager() {
-
-            viewPager.setAdapter(new PagerAdapter() {
-
-                PhotoView destroyedView;
-
-                @Override
-                public int getCount() {
-                    return filePaths.size();
-                }
-
-                @Override
-                public boolean isViewFromObject(View view, Object object) {
-                    return view == object;
-                }
-
-                @Override
-                public Object instantiateItem(ViewGroup container, int position) {
-
-                    PhotoView p;
-                    if (destroyedView != null){
-                        p = destroyedView;
-                        destroyedView = null;
-                    }
-                    else{
-                        p = getView();
-                    }
-                    final PhotoView photoView = p;
-
-                    photoView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ImageActivity.this.onFinish();
-                        }
-                    });
-
-                    String path = filePaths.get(position);
-                    if (images == null){
-                        Glide.with(ImageActivity.this)
-                                .load(path)
-                                .placeholder(placeHolderImageRes)
-                                .into(photoView);
-                    }
-                    else{
-                        Glide.with(ImageActivity.this)
-                                .load(path)
-                                .placeholder(images.get(position).srcImageView.getDrawable())
-                                .into(photoView);
-                    }
-
-
-
-                    Log.print(photoView.toString());
-
-                    container.addView(photoView);
-
-                    return photoView;
-                }
-
-                @Override
-                public void destroyItem(ViewGroup container, int position, Object object) {
-                    destroyedView = (PhotoView) object;
-                    container.removeView(destroyedView);
-                }
-
-                private PhotoView getView(){
-
-                    PhotoView photoView = new PhotoView(ImageActivity.this);
-
-                    // 启用图片缩放功能
-                    photoView.enable();
-                    photoView.setAnimaDuring(300);
-                    photoView.setMaxScale(6);
-                    photoView.setInterpolator(new DecelerateInterpolator());
-                    photoView.setScaleType(scaleType);
-                    return photoView;
-                }
-
-            });
+            adapter = new MyPageAdapter();
+            viewPager.setAdapter(adapter);
 
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -409,64 +368,239 @@ public class ImageBrowser {
             }
         }
 
+        private class AnimAction implements Runnable {
+            private View mView;
+            private int step;
+            final int minStep = 3;
+            public AnimAction(View view) {
+                mView = view;
+                float s = -mView.getY() / 6;
+                if (Math.abs(s) < minStep){
+                    if (s < 0){
+                        step = -minStep;
+                    }
+                    else{
+                        step = minStep;
+                    }
+                }
+                else{
+                    step = (int) s;
+                }
+            }
+            @Override
+            public void run() {
+                int y = (int) (mView.getY() + step);
+
+                if (Math.abs(y) < Math.abs(step)){
+                    y = 0;
+                }
+                Log.print(mView.getY() + "   " + step);
+                mView.setY(y);
+                if (mView.getY() != 0 && animating){
+                    ViewCompat.postOnAnimationDelayed(mView, new AnimAction(mView), 10);
+                }
+            }
+        }
+
+        private boolean onGesture(MotionEvent ev) {
+            switch (ev.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    startY = ev.getY();
+                    viewY = bgView.getY();
+                    animating = false;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    int top = (int) (ev.getY() - startY + viewY);
+//                    bgView.layout(0, top, bgView.getWidth(), top + bgView.getHeight());
+
+
+                    bgView.setY(top);
+//                    bgView.setBottom((int) (top + sh));
+//                    Log.print(top);
+
+                    break;
+                case MotionEvent.ACTION_UP:
+
+                    animating = true;
+                    int step = bgView.getY() > 0 ? -1 : 1;
+                    bgView.postOnAnimation(new AnimAction(bgView));
+
+
+//                    final int y = (int) bgView.getY();
+//                    Log.print(bgView.getY());
+//                    Log.print(bgView.getBottom());
+//                    final Animation an = new TranslateAnimation(0, 0, 0, bgView.getY() * -1);
+//                    an.setDuration(1000);
+//                    an.setFillAfter(true);
+//                    an.setAnimationListener(new Animation.AnimationListener() {
+//                        @Override
+//                        public void onAnimationStart(Animation animation) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onAnimationEnd(Animation animation) {
+//
+//                            bgView.layout(0, 0, bgView.getWidth(), bgView.getHeight());
+//                            Log.print(bgView.getY());
+//                            Log.print(bgView.getBottom());
+//                        }
+//
+//                        @Override
+//                        public void onAnimationRepeat(Animation animation) {
+//
+//                        }
+//                    });
+//                    bgView.clearAnimation();
+//                    bgView.setAnimation(an);
+//
+//                    an.start();
+
+//                    bgView.postInvalidateOnAnimation(0, 0, bgView.getWidth(), bgView.getHeight());
+                    break;
+            }
+
+            return false;
+        }
+
         private void addAnimationExit(RectF rectF, PhotoView srcImageView){
 
-            if (views.size() == 0){
-                return;
+//            PhotoView photoView = views.get(currentIndex);
+//
+//            Info info = srcImageView.getInfo();
+//            try {
+//                Class cls = info.getClass();
+//                Field fImg = cls.getDeclaredField("mImgRect");
+//                fImg.setAccessible(true);
+//                RectF imgRect = (RectF) fImg.get(info);
+//
+//                Field f = cls.getDeclaredField("mRect");
+//                f.setAccessible(true);
+//                RectF mRect = (RectF) f.get(info);
+//
+//                float d = rectF.top + imgRect.top;
+//                float h = mRect.height();
+//                mRect.top = d;
+//                mRect.bottom = d + h;
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            photoView.setAnimaDuring(animDuration + 50);
+//            photoView.animaTo(info, new Runnable() {
+//                @Override
+//                public void run() {
+//
+//                }
+//            });
+//
+//
+//            Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+//            fade.setDuration(animDuration);
+//            fade.setAnimationListener(new Animation.AnimationListener() {
+//                @Override
+//                public void onAnimationStart(Animation animation) {
+//                    contentView.setEnabled(false);
+//                }
+//
+//                @Override
+//                public void onAnimationEnd(Animation animation) {
+//                    finish();
+//                }
+//
+//                @Override
+//                public void onAnimationRepeat(Animation animation) {
+//
+//                }
+//            });
+//            fade.setFillAfter(true);
+//
+//            bgView.clearAnimation();
+//            bgView.setAnimation(fade);
+
+        }
+
+        class MyPageAdapter extends PagerAdapter {
+
+            PhotoView destroyedView;
+            private HashMap<Integer, PhotoView> cacheViews;
+
+            public MyPageAdapter(){
+                cacheViews = new HashMap<>();
             }
-            PhotoView photoView = views.get(currentIndex);
 
-            Info info = srcImageView.getInfo();
-            try {
-                Class cls = info.getClass();
-                Field fImg = cls.getDeclaredField("mImgRect");
-                fImg.setAccessible(true);
-                RectF imgRect = (RectF) fImg.get(info);
-
-                Field f = cls.getDeclaredField("mRect");
-                f.setAccessible(true);
-                RectF mRect = (RectF) f.get(info);
-
-                float d = rectF.top + imgRect.top;
-                float h = mRect.height();
-                mRect.top = d;
-                mRect.bottom = d + h;
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            @Override
+            public int getCount() {
+                return filePaths.size();
             }
-            photoView.setAnimaDuring(animDuration + 50);
-            photoView.animaTo(info, new Runnable() {
-                @Override
-                public void run() {
 
+            @Override
+            public boolean isViewFromObject(View view, Object object) {
+                return view == object;
+            }
+
+            @Override
+            public Object instantiateItem(ViewGroup container, int position) {
+
+                PhotoView p;
+                if (destroyedView != null){
+                    p = destroyedView;
+                    destroyedView = null;
                 }
-            });
+                else{
+                    p = getView();
+                }
+                final PhotoView photoView = p;
 
+                photoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ImageActivity.this.onFinish();
+                    }
+                });
 
-            Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-            fade.setDuration(animDuration);
-            fade.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    contentView.setEnabled(false);
+                String path = filePaths.get(position);
+                if (images == null){
+                    Glide.with(ImageActivity.this)
+                            .load(path)
+                            .placeholder(placeHolderImageRes)
+                            .into(photoView);
+                }
+                else{
+                    Glide.with(ImageActivity.this)
+                            .load(path)
+                            .placeholder(images.get(position).srcImageView.getDrawable())
+                            .into(photoView);
                 }
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    finish();
-                }
+                container.addView(photoView);
+                cacheViews.put(position, photoView);
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {
+                return photoView;
+            }
 
-                }
-            });
-            fade.setFillAfter(true);
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                destroyedView = (PhotoView) object;
+                container.removeView(destroyedView);
+            }
 
-            bgView.clearAnimation();
-            bgView.setAnimation(fade);
+            public PhotoView getView(int position){
+                return cacheViews.get(position);
+            }
 
+            private PhotoView getView(){
+
+                PhotoView photoView = new PhotoView(ImageActivity.this);
+
+                // 启用图片缩放功能
+                photoView.enable();
+                photoView.setAnimaDuring(300);
+                photoView.setMaxScale(6);
+                photoView.setInterpolator(new DecelerateInterpolator());
+                photoView.setScaleType(scaleType);
+                return photoView;
+            }
         }
 
         @Override
@@ -483,17 +617,17 @@ public class ImageBrowser {
             super.onDestroy();
         }
 
-        @Override
-        public boolean onKeyDown(int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_BACK){
-                if (contentView.isEnabled()){
-                    contentView.setEnabled(false);
-                    onFinish();
-                }
-                return true;
-            }
-            return super.onKeyDown(keyCode, event);
-        }
+//        @Override
+//        public boolean onKeyDown(int keyCode, KeyEvent event) {
+//            if (keyCode == KeyEvent.KEYCODE_BACK){
+//                if (contentView.isEnabled()){
+//                    contentView.setEnabled(false);
+//                    onFinish();
+//                }
+//                return true;
+//            }
+//            return super.onKeyDown(keyCode, event);
+//        }
     }
 
 

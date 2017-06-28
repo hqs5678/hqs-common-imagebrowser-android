@@ -11,6 +11,8 @@ import android.widget.RelativeLayout;
 
 public class ContentView extends RelativeLayout {
 
+    private InterceptListener interceptListener;
+
     public ContentView(Context context) {
         super(context);
     }
@@ -21,11 +23,16 @@ public class ContentView extends RelativeLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (this.isEnabled()){
-            return super.onInterceptTouchEvent(ev);
+
+        if (interceptListener == null){
+            if (this.isEnabled()){
+                return super.onInterceptTouchEvent(ev);
+            } else {
+                return true;
+            }
         }
         else{
-            return true;
+            return interceptListener.onInterceptTouchEvent(ev);
         }
     }
 
@@ -38,4 +45,12 @@ public class ContentView extends RelativeLayout {
             return true;
         }
     }
+
+    public void setInterceptListener(InterceptListener interceptListener) {
+        this.interceptListener = interceptListener;
+    }
+}
+
+interface InterceptListener {
+    boolean onInterceptTouchEvent(MotionEvent ev);
 }
