@@ -105,6 +105,7 @@ public class ImageBrowser {
         private float startY;
         private float viewY;
         private boolean animating = false;
+        private int dismissOffset = 0;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +122,7 @@ public class ImageBrowser {
             }
             sw = ScreenUtils.screenW(this);
             sh = ScreenUtils.screenH(this);
+            dismissOffset = (int) (sw * 0.26);
 
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
@@ -466,7 +468,7 @@ public class ImageBrowser {
                 case MotionEvent.ACTION_CANCEL:
                     viewPager.setEnabled(true);
                     animating = true;
-                    if (Math.abs(ev.getY() - startY) > sh * 0.2){
+                    if (Math.abs(ev.getY() - startY) > dismissOffset){
                         viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
                     }
                     else{
