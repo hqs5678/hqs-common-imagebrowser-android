@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -329,47 +330,10 @@ public class ImageBrowser {
         }
 
         private void onFinish(){
-
-            // 添加动画
-            if (images != null && images.size() > 0){
-                final PhotoView imageView = images.get(currentIndex).srcImageView;
-                ViewUtil.getViewRect(imageView, new ViewUtil.OnViewRectCallBack() {
-                    @Override
-                    public void onRect(final RectF rectF) {
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                addAnimationExit(rectF, imageView);
-                            }
-                        });
-
-                    }
-                });
-            }
-            else {
-                Animation animation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-                animation.setDuration(animDuration + 100);
-                animation.setFillAfter(true);
-                animation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        contentView.setEnabled(false);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        finish();
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-
-                contentView.clearAnimation();
-                contentView.setAnimation(animation);
-            }
+            // finish
+            animating = true;
+            viewPager.setY(-1);
+            viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
         }
 
         private class AnimAction implements Runnable {
@@ -672,17 +636,17 @@ public class ImageBrowser {
             super.onDestroy();
         }
 
-//        @Override
-//        public boolean onKeyDown(int keyCode, KeyEvent event) {
-//            if (keyCode == KeyEvent.KEYCODE_BACK){
-//                if (contentView.isEnabled()){
-//                    contentView.setEnabled(false);
-//                    onFinish();
-//                }
-//                return true;
-//            }
-//            return super.onKeyDown(keyCode, event);
-//        }
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK){
+                if (contentView.isEnabled()){
+                    contentView.setEnabled(false);
+                    onFinish();
+                }
+                return true;
+            }
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
 
