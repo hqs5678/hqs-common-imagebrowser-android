@@ -141,13 +141,6 @@ public class ImageBrowser {
                 bgView.setBackgroundResource(backgroundColorRes);
             }
             this.setContentView(contentView);
-            contentView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    contentView.setEnabled(false);
-                    onFinish();
-                }
-            });
 
             tvIndex = (TextView) contentView.findViewById(R.id.tv_index);
             tvIndex.setText(currentIndex + 1 + "/" + filePaths.size());
@@ -482,63 +475,6 @@ public class ImageBrowser {
             return false;
         }
 
-        private void addAnimationExit(RectF rectF, PhotoView srcImageView){
-
-//            PhotoView photoView = views.get(currentIndex);
-//
-//            Info info = srcImageView.getInfo();
-//            try {
-//                Class cls = info.getClass();
-//                Field fImg = cls.getDeclaredField("mImgRect");
-//                fImg.setAccessible(true);
-//                RectF imgRect = (RectF) fImg.get(info);
-//
-//                Field f = cls.getDeclaredField("mRect");
-//                f.setAccessible(true);
-//                RectF mRect = (RectF) f.get(info);
-//
-//                float d = rectF.top + imgRect.top;
-//                float h = mRect.height();
-//                mRect.top = d;
-//                mRect.bottom = d + h;
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            photoView.setAnimaDuring(animDuration + 50);
-//            photoView.animaTo(info, new Runnable() {
-//                @Override
-//                public void run() {
-//
-//                }
-//            });
-//
-//
-//            Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-//            fade.setDuration(animDuration);
-//            fade.setAnimationListener(new Animation.AnimationListener() {
-//                @Override
-//                public void onAnimationStart(Animation animation) {
-//                    contentView.setEnabled(false);
-//                }
-//
-//                @Override
-//                public void onAnimationEnd(Animation animation) {
-//                    finish();
-//                }
-//
-//                @Override
-//                public void onAnimationRepeat(Animation animation) {
-//
-//                }
-//            });
-//            fade.setFillAfter(true);
-//
-//            bgView.clearAnimation();
-//            bgView.setAnimation(fade);
-
-        }
-
         class MyPageAdapter extends PagerAdapter {
 
             PhotoView destroyedView;
@@ -648,8 +584,5 @@ public class ImageBrowser {
             return super.onKeyDown(keyCode, event);
         }
     }
-
-
-
 
 }
