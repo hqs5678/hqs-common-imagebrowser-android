@@ -8,10 +8,13 @@ import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
 import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.helper.imagebrowser.QImage;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.SDCardUtils;
 import com.hqs.common.utils.ScreenUtils;
-import com.hqs.common.utils.SharedPreferenceUtil;
+import com.wenming.library.LogReport;
+import com.wenming.library.save.imp.CrashWriter;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,6 +27,38 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        LogReport.getInstance()
+                .setCacheSize(30 * 1024 * 1024)//支持设置缓存大小，超出后清空
+                .setLogDir(getApplicationContext(), "sdcard/" + this.getString(this.getApplicationInfo().labelRes) + "/")//定义路径为：sdcard/[app name]/
+                .setWifiOnly(true)//设置只在Wifi状态下上传，设置为false为Wifi和移动网络都上传
+                .setLogSaver(new CrashWriter(getApplicationContext()))//支持自定义保存崩溃信息的样式
+                //.setEncryption(new AESEncode()) //支持日志到AES加密或者DES加密，默认不开启
+                .init(getApplicationContext());
+
+        Log.print("sdcard/" + this.getString(this.getApplicationInfo().labelRes) + "/");
+
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        sendLog();
+    }
+
+    private void sendLog(){
+        String logFile = "sdcard/" + this.getString(this.getApplicationInfo().labelRes) + "/";
+        ArrayList<File> files = FileUtil.findFiles(logFile);
+        if (files != null && files.size() > 0){
+            for (File file: files){
+                String log = FileUtil.fileToString(file);
+                Log.print("CrashLog: " + log);
+
+            }
+        }
+        FileUtil.removeDir(new File(logFile));
     }
 
 
@@ -71,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (view.getId() == R.id.image19){
                 showImg1(9);
+            }
+            else if (view.getId() == R.id.image20){
+                showImg1(10);
             }
         } else {
             ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
@@ -161,6 +199,10 @@ public class MainActivity extends AppCompatActivity {
 
         image = new QImage();
         image.srcImageView = (PhotoView) findViewById(R.id.image19);
+        arrayList.add(image);
+
+        image = new QImage();
+        image.srcImageView = (PhotoView) findViewById(R.id.image20);
         arrayList.add(image);
 
         ImageBrowser.showWithImages(this, arrayList, index);

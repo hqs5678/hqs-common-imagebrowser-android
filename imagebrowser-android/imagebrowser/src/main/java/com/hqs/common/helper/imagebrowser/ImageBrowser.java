@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -267,6 +268,7 @@ public class ImageBrowser {
 
             viewPager.setAdapter(new PagerAdapter() {
 
+                PhotoView destroyedView;
 
                 @Override
                 public int getCount() {
@@ -281,10 +283,15 @@ public class ImageBrowser {
                 @Override
                 public Object instantiateItem(ViewGroup container, int position) {
 
-                    final PhotoView photoView = getView(position);
-
-
-
+                    PhotoView p;
+                    if (destroyedView != null){
+                        p = destroyedView;
+                        destroyedView = null;
+                    }
+                    else{
+                        p = getView();
+                    }
+                    final PhotoView photoView = p;
 
                     photoView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -309,6 +316,7 @@ public class ImageBrowser {
 
 
 
+                    Log.print(photoView.toString());
 
                     container.addView(photoView);
 
@@ -317,28 +325,21 @@ public class ImageBrowser {
 
                 @Override
                 public void destroyItem(ViewGroup container, int position, Object object) {
-                    container.removeView((View) object);
+                    destroyedView = (PhotoView) object;
+                    container.removeView(destroyedView);
                 }
 
-                private PhotoView getView(int position){
+                private PhotoView getView(){
 
-                    if (views.size() == 0 || position + 1 > views.size()){
-                        PhotoView photoView;
-                        for (int i = views.size(); i < position + 1; i ++){
-                            photoView = new PhotoView(ImageActivity.this);
+                    PhotoView photoView = new PhotoView(ImageActivity.this);
 
-                            // 启用图片缩放功能
-                            photoView.enable();
-                            photoView.setAnimaDuring(300);
-                            photoView.setMaxScale(6);
-                            photoView.setInterpolator(new DecelerateInterpolator());
-                            photoView.setScaleType(scaleType);
-
-                            views.add(photoView);
-                        }
-                    }
-
-                    return views.get(position);
+                    // 启用图片缩放功能
+                    photoView.enable();
+                    photoView.setAnimaDuring(300);
+                    photoView.setMaxScale(6);
+                    photoView.setInterpolator(new DecelerateInterpolator());
+                    photoView.setScaleType(scaleType);
+                    return photoView;
                 }
 
             });
