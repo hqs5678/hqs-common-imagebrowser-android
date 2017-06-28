@@ -17,6 +17,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -103,7 +105,11 @@ public class ImageBrowser {
         private float sh;
         private ImageView.ScaleType scaleType = ImageView.ScaleType.FIT_CENTER;
         private float startY;
+        private float startX;
         private float viewY;
+        private float viewX;
+        // 手指滑动方向
+        private int orientation = -1;
         private boolean animating = false;
         private int dismissOffset = 0;
 
@@ -401,6 +407,64 @@ public class ImageBrowser {
 
         }
 
+        // 甩出动画
+        private class AnimActionOutHorizontal extends AnimAction {
+
+            public AnimActionOutHorizontal(View slideView, View fadeView) {
+                super(slideView, fadeView);
+
+                int x = (int) this.slideView.getX();
+                float s;
+                if (x > 0){
+                    s = (sh - x) / 6;
+                }
+                else{
+                    s = -(this.slideView.getRight() + this.slideView.getX()) / 6;
+                }
+
+                if (Math.abs(s) < minStep){
+                    if (x < 0){
+                        step = -minStep;
+                    }
+                    else{
+                        step = minStep;
+                    }
+                }
+                else{
+                    step = (int) s;
+                }
+            }
+            @Override
+            public void run() {
+                int x = (int) (slideView.getX() + step);
+                if (step > 0){
+                    if (x > sw){
+                        x = (int) sw;
+                    }
+                }
+                else{
+                    if (x < -sw){
+                        x = (int) -sw;
+                    }
+                }
+                slideView.setX(x);
+                fade(x);
+                if (Math.abs(slideView.getX()) != sw && animating){
+                    ViewCompat.postOnAnimationDelayed(slideView, new AnimActionOutHorizontal(slideView, fadeView), 10);
+                }
+                else{
+                    onAnimationStop();
+                }
+            }
+
+            @Override
+            public void fade(int x) {
+                float alpha = 1.0f - Math.abs(x / sw);
+                fadeView.setAlpha(alpha);
+            }
+
+        }
+
         // 弹回动画
         private class AnimActionBack extends AnimAction {
 
@@ -436,8 +500,45 @@ public class ImageBrowser {
             }
         }
 
-        private void onAnimationStop() {
-            finish();
+        // 弹回动画
+        private class AnimActionBackHorizontal extends AnimAction {
+
+
+            public AnimActionBackHorizontal(View slideView, View fadeView) {
+                super(slideView, fadeView);
+
+                float s = -slideView.getX() / 6;
+                if (Math.abs(s) < minStep){
+                    if (s < 0){
+                        step = -minStep;
+                    }
+                    else{
+                        step = minStep;
+                    }
+                }
+                else{
+                    step = (int) s;
+                }
+            }
+            @Override
+            public void run() {
+                int x = (int) (slideView.getX() + step);
+
+                if (Math.abs(x) < Math.abs(step)){
+                    x = 0;
+                }
+                slideView.setX(x);
+                fade(x);
+                if (slideView.getX() != 0 && animating){
+                    ViewCompat.postOnAnimationDelayed(slideView, new AnimActionBackHorizontal(slideView, fadeView), 10);
+                }
+            }
+
+            @Override
+            public void fade(int x) {
+                float alpha = 1.0f - Math.abs(x / sw);
+                fadeView.setAlpha(alpha);
+            }
         }
 
         private boolean onGesture(MotionEvent ev) {
@@ -445,12 +546,18 @@ public class ImageBrowser {
             switch (ev.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     startY = ev.getY();
+                    startX = ev.getX();
                     viewY = viewPager.getY();
+                    viewX = viewPager.getX();
                     animating = false;
+                    orientation = -1;
                     break;
+
                 case MotionEvent.ACTION_MOVE:
+
                     int top = (int) (ev.getY() - startY + viewY);
-                    if (Math.abs(top) > TOUCH_OFFSET){
+                    if (Math.abs(top) > TOUCH_OFFSET && (orientation == -1 || orientation == LinearLayout.VERTICAL)){
+                        orientation = LinearLayout.VERTICAL;
                         if (ev.getY() - startY > 0){
                             viewPager.setY(top - TOUCH_OFFSET);
                         }
@@ -462,19 +569,50 @@ public class ImageBrowser {
                         float alpha = 1.0f - Math.abs((top - TOUCH_OFFSET) / sh);
                         bgView.setAlpha(alpha);
                     }
+                    else{
+                        // 手指右滑
+
+                        if (viewPager.isEnabled()){
+                            return false;
+                        }
+                        int left = (int) (ev.getX() - startX + viewX);
+                        if (Math.abs(left) > TOUCH_OFFSET && (orientation == -1 || orientation == LinearLayout.HORIZONTAL)) {
+                            orientation = LinearLayout.HORIZONTAL;
+                            if (ev.getX() - startX > 0){
+                                viewPager.setX(left - TOUCH_OFFSET);
+                            }
+                            else{
+                                viewPager.setX(left + TOUCH_OFFSET);
+                            }
+                            viewPager.setEnabled(false);
+
+                            float alpha = 1.0f - Math.abs((left - TOUCH_OFFSET) / sw);
+                            bgView.setAlpha(alpha);
+                        }
+                    }
 
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     viewPager.setEnabled(true);
                     animating = true;
-                    if (Math.abs(ev.getY() - startY) > dismissOffset){
-                        viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
-                    }
-                    else{
-                        viewPager.postOnAnimation(new AnimActionBack(viewPager, bgView));
-                    }
 
+                    if (orientation == LinearLayout.HORIZONTAL) {
+                        if (Math.abs(ev.getX() - startX) > dismissOffset) {
+                            viewPager.postOnAnimation(new AnimActionOutHorizontal(viewPager, bgView));
+                        }
+                        else {
+                            viewPager.postOnAnimation(new AnimActionBackHorizontal(viewPager, bgView));
+                        }
+
+                    } else {
+                        if (Math.abs(ev.getY() - startY) > dismissOffset) {
+                            viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
+                        } else {
+                            viewPager.postOnAnimation(new AnimActionBack(viewPager, bgView));
+                        }
+                    }
+                    orientation = -1;
                     break;
             }
 
@@ -555,6 +693,10 @@ public class ImageBrowser {
                 photoView.setScaleType(scaleType);
                 return photoView;
             }
+        }
+
+        private void onAnimationStop() {
+            finish();
         }
 
         @Override
