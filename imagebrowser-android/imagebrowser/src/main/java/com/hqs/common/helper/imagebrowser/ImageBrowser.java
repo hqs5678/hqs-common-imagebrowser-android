@@ -406,57 +406,18 @@ public class ImageBrowser {
             switch (ev.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     startY = ev.getY();
-                    viewY = bgView.getY();
+                    viewY = viewPager.getY();
                     animating = false;
                     break;
                 case MotionEvent.ACTION_MOVE:
                     int top = (int) (ev.getY() - startY + viewY);
-//                    bgView.layout(0, top, bgView.getWidth(), top + bgView.getHeight());
-
-
-                    bgView.setY(top);
-//                    bgView.setBottom((int) (top + sh));
-//                    Log.print(top);
-
+                    viewPager.setY(top);
                     break;
                 case MotionEvent.ACTION_UP:
 
                     animating = true;
-                    int step = bgView.getY() > 0 ? -1 : 1;
-                    bgView.postOnAnimation(new AnimAction(bgView));
+                    viewPager.postOnAnimation(new AnimAction(viewPager));
 
-
-//                    final int y = (int) bgView.getY();
-//                    Log.print(bgView.getY());
-//                    Log.print(bgView.getBottom());
-//                    final Animation an = new TranslateAnimation(0, 0, 0, bgView.getY() * -1);
-//                    an.setDuration(1000);
-//                    an.setFillAfter(true);
-//                    an.setAnimationListener(new Animation.AnimationListener() {
-//                        @Override
-//                        public void onAnimationStart(Animation animation) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onAnimationEnd(Animation animation) {
-//
-//                            bgView.layout(0, 0, bgView.getWidth(), bgView.getHeight());
-//                            Log.print(bgView.getY());
-//                            Log.print(bgView.getBottom());
-//                        }
-//
-//                        @Override
-//                        public void onAnimationRepeat(Animation animation) {
-//
-//                        }
-//                    });
-//                    bgView.clearAnimation();
-//                    bgView.setAnimation(an);
-//
-//                    an.start();
-
-//                    bgView.postInvalidateOnAnimation(0, 0, bgView.getWidth(), bgView.getHeight());
                     break;
             }
 
