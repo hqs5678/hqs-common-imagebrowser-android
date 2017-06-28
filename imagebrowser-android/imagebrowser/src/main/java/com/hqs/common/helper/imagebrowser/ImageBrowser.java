@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
-import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -450,7 +449,12 @@ public class ImageBrowser {
                 case MotionEvent.ACTION_MOVE:
                     int top = (int) (ev.getY() - startY + viewY);
                     if (Math.abs(top) > TOUCH_OFFSET){
-                        viewPager.setY(top - TOUCH_OFFSET);
+                        if (ev.getY() - startY > 0){
+                            viewPager.setY(top - TOUCH_OFFSET);
+                        }
+                        else{
+                            viewPager.setY(top + TOUCH_OFFSET);
+                        }
                         viewPager.setEnabled(false);
 
                         float alpha = 1.0f - Math.abs((top - TOUCH_OFFSET) / sh);
@@ -506,13 +510,6 @@ public class ImageBrowser {
                     p = getView();
                 }
                 final PhotoView photoView = p;
-
-                photoView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ImageActivity.this.onFinish();
-                    }
-                });
 
                 String path = filePaths.get(position);
                 if (images == null){
