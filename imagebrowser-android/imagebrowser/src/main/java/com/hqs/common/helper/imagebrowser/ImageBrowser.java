@@ -8,8 +8,6 @@ import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.view.DragEvent;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,8 +15,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Transformation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -47,6 +43,7 @@ public class ImageBrowser {
     public static int backgroundColorRes = -1;
     public static int animDuration = 200;
     private static ArrayList<QImage> images;
+    private static final int TOUCH_OFFSET = 40;
 
     /**
      * show
@@ -98,7 +95,7 @@ public class ImageBrowser {
         private int currentIndex;
         private ContentView contentView;
         private RelativeLayout bgView;
-        private ViewPager viewPager;
+        private MyViewPager viewPager;
         private TextView tvIndex;
         private Handler mHandler;
         private MyPageAdapter adapter;
@@ -153,12 +150,14 @@ public class ImageBrowser {
 
             tvIndex = (TextView) contentView.findViewById(R.id.tv_index);
             tvIndex.setText(currentIndex + 1 + "/" + filePaths.size());
-            viewPager = (ViewPager) contentView.findViewById(R.id.viewPager);
-
+            viewPager = (MyViewPager) contentView.findViewById(R.id.viewPager);
 
             contentView.setInterceptListener(new InterceptListener() {
                 @Override
                 public boolean onInterceptTouchEvent(MotionEvent ev) {
+                    if (contentView.isEnabled() == false){
+                        return true;
+                    }
 
                     if (ev.getPointerCount() == 1){
                         PhotoView photoView = adapter.getView(viewPager.getCurrentItem());
@@ -179,6 +178,11 @@ public class ImageBrowser {
                         }
                     }
                     return false;
+                }
+
+                @Override
+                public boolean onTouchEvent(MotionEvent event) {
+                    return true;
                 }
             });
 
@@ -265,7 +269,7 @@ public class ImageBrowser {
                 @Override
                 public void run() {
                     Animation fade = AnimationUtils.loadAnimation(ImageActivity.this, android.R.anim.fade_out);
-                    fade.setDuration(300);
+                    fade.setDuration(100);
                     fade.setFillAfter(true);
                     fade.setAnimationListener(new Animation.AnimationListener() {
                         @Override
@@ -288,7 +292,7 @@ public class ImageBrowser {
                     imageView.setAnimation(fade);
                     fade.start();
                 }
-            }, animDuration + 400);
+            }, animDuration + 200);
 
             Animation fade = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
             fade.setDuration(animDuration);
@@ -369,12 +373,84 @@ public class ImageBrowser {
         }
 
         private class AnimAction implements Runnable {
-            private View mView;
-            private int step;
+            View slideView;
+            View fadeView;
+            int step;
             final int minStep = 3;
-            public AnimAction(View view) {
-                mView = view;
-                float s = -mView.getY() / 6;
+
+            public AnimAction(View slideView, View fadeView) {
+                this.slideView = slideView;
+                this.fadeView = fadeView;
+            }
+            @Override
+            public void run() {
+
+            }
+
+            public void fade(int y){
+                float alpha = 1.0f - Math.abs(y / sh);
+                fadeView.setAlpha(alpha);
+            }
+        }
+
+        private class AnimActionOut extends AnimAction {
+
+            public AnimActionOut(View slideView, View fadeView) {
+                super(slideView, fadeView);
+
+                int y = (int) this.slideView.getY();
+                float s;
+                if (y > 0){
+                    s = (sh - y) / 6;
+                }
+                else{
+                    s = -(this.slideView.getBottom() + this.slideView.getY()) / 6;
+                }
+
+                if (Math.abs(s) < minStep){
+                    if (y < 0){
+                        step = -minStep;
+                    }
+                    else{
+                        step = minStep;
+                    }
+                }
+                else{
+                    step = (int) s;
+                }
+            }
+            @Override
+            public void run() {
+                int y = (int) (slideView.getY() + step);
+                if (step > 0){
+                    if (y > sh){
+                        y = (int) sh;
+                    }
+                }
+                else{
+                    if (y < -sh){
+                        y = (int) -sh;
+                    }
+                }
+                slideView.setY(y);
+                fade(y);
+                if (Math.abs(slideView.getY()) != sh && animating){
+                    ViewCompat.postOnAnimationDelayed(slideView, new AnimActionOut(slideView, fadeView), 10);
+                }
+                else{
+                    onAnimationStop();
+                }
+            }
+
+        }
+
+        private class AnimActionBack extends AnimAction {
+
+
+            public AnimActionBack(View slideView, View fadeView) {
+                super(slideView, fadeView);
+
+                float s = -slideView.getY() / 6;
                 if (Math.abs(s) < minStep){
                     if (s < 0){
                         step = -minStep;
@@ -389,20 +465,25 @@ public class ImageBrowser {
             }
             @Override
             public void run() {
-                int y = (int) (mView.getY() + step);
+                int y = (int) (slideView.getY() + step);
 
                 if (Math.abs(y) < Math.abs(step)){
                     y = 0;
                 }
-                Log.print(mView.getY() + "   " + step);
-                mView.setY(y);
-                if (mView.getY() != 0 && animating){
-                    ViewCompat.postOnAnimationDelayed(mView, new AnimAction(mView), 10);
+                slideView.setY(y);
+                fade(y);
+                if (slideView.getY() != 0 && animating){
+                    ViewCompat.postOnAnimationDelayed(slideView, new AnimActionBack(slideView, fadeView), 10);
                 }
             }
         }
 
+        private void onAnimationStop() {
+            finish();
+        }
+
         private boolean onGesture(MotionEvent ev) {
+
             switch (ev.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     startY = ev.getY();
@@ -411,12 +492,25 @@ public class ImageBrowser {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     int top = (int) (ev.getY() - startY + viewY);
-                    viewPager.setY(top);
+                    if (Math.abs(top) > TOUCH_OFFSET){
+                        viewPager.setY(top - TOUCH_OFFSET);
+                        viewPager.setEnabled(false);
+
+                        float alpha = 1.0f - Math.abs((top - TOUCH_OFFSET) / sh);
+                        bgView.setAlpha(alpha);
+                    }
+
                     break;
                 case MotionEvent.ACTION_UP:
-
+                case MotionEvent.ACTION_CANCEL:
+                    viewPager.setEnabled(true);
                     animating = true;
-                    viewPager.postOnAnimation(new AnimAction(viewPager));
+                    if (Math.abs(ev.getY() - startY) > sh * 0.2){
+                        viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
+                    }
+                    else{
+                        viewPager.postOnAnimation(new AnimActionBack(viewPager, bgView));
+                    }
 
                     break;
             }

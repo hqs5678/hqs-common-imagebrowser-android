@@ -10,12 +10,12 @@
         android:layout_height="match_parent"
         android:background="#df060606" />
 
-    <android.support.v4.view.ViewPager
+    <com.hqs.common.helper.imagebrowser.MyViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </android.support.v4.view.ViewPager>
+    </com.hqs.common.helper.imagebrowser.MyViewPager>
 
     <TextView
         android:id="@+id/tv_index"

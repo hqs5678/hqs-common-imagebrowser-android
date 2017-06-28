@@ -24,26 +24,34 @@ public class ContentView extends RelativeLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
-        if (interceptListener == null){
-            if (this.isEnabled()){
+        if (interceptListener == null) {
+            if (this.isEnabled()) {
                 return super.onInterceptTouchEvent(ev);
             } else {
                 return true;
             }
-        }
-        else{
+        } else {
             return interceptListener.onInterceptTouchEvent(ev);
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (this.isEnabled()){
-            return super.onTouchEvent(event);
+        if (interceptListener != null) {
+            if (this.isEnabled()) {
+                return interceptListener.onTouchEvent(event);
+            } else {
+                return true;
+            }
         }
         else{
-            return true;
+            if (this.isEnabled()) {
+                return super.onTouchEvent(event);
+            } else {
+                return true;
+            }
         }
+
     }
 
     public void setInterceptListener(InterceptListener interceptListener) {
@@ -53,4 +61,6 @@ public class ContentView extends RelativeLayout {
 
 interface InterceptListener {
     boolean onInterceptTouchEvent(MotionEvent ev);
+
+    boolean onTouchEvent(MotionEvent event);
 }
