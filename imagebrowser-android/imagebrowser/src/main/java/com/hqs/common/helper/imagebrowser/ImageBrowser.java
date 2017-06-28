@@ -293,9 +293,6 @@ public class ImageBrowser {
             fade.setDuration(animDuration);
 
             bgView.setAnimation(fade);
-
-
-
         }
 
         private void setupViewPager() {
@@ -330,6 +327,7 @@ public class ImageBrowser {
             viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
         }
 
+        // 动画基类
         private class AnimAction implements Runnable {
             View slideView;
             View fadeView;
@@ -351,6 +349,7 @@ public class ImageBrowser {
             }
         }
 
+        // 甩出动画
         private class AnimActionOut extends AnimAction {
 
             public AnimActionOut(View slideView, View fadeView) {
@@ -402,6 +401,7 @@ public class ImageBrowser {
 
         }
 
+        // 弹回动画
         private class AnimActionBack extends AnimAction {
 
 
