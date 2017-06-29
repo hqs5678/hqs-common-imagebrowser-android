@@ -319,19 +319,16 @@ public class ImageBrowser {
             // finish
             animating = true;
             viewPager.setY(-1);
-            viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
+            viewPager.postOnAnimation(new AnimActionOut());
         }
 
         // 动画基类
         private class AnimAction implements Runnable {
-            View slideView;
-            View fadeView;
+
             int step;
             final int minStep = 3;
 
-            public AnimAction(View slideView, View fadeView) {
-                this.slideView = slideView;
-                this.fadeView = fadeView;
+            public AnimAction() {
             }
             @Override
             public void run() {
@@ -340,23 +337,24 @@ public class ImageBrowser {
 
             public void fade(int y){
                 float alpha = 1.0f - Math.abs(y / sh);
-                fadeView.setAlpha(alpha);
+                bgView.setAlpha(alpha);
+                tvIndex.setAlpha(alpha);
             }
         }
 
         // 甩出动画
         private class AnimActionOut extends AnimAction {
 
-            public AnimActionOut(View slideView, View fadeView) {
-                super(slideView, fadeView);
+            public AnimActionOut() {
+                super();
 
-                int y = (int) this.slideView.getY();
+                int y = (int) viewPager.getY();
                 float s;
                 if (y > 0){
                     s = (sh - y) / 6;
                 }
                 else{
-                    s = -(this.slideView.getBottom() + this.slideView.getY()) / 6;
+                    s = -(viewPager.getBottom() + viewPager.getY()) / 6;
                 }
 
                 if (Math.abs(s) < minStep){
@@ -373,7 +371,7 @@ public class ImageBrowser {
             }
             @Override
             public void run() {
-                int y = (int) (slideView.getY() + step);
+                int y = (int) (viewPager.getY() + step);
                 if (step > 0){
                     if (y > sh){
                         y = (int) sh;
@@ -384,10 +382,10 @@ public class ImageBrowser {
                         y = (int) -sh;
                     }
                 }
-                slideView.setY(y);
+                viewPager.setY(y);
                 fade(y);
-                if (Math.abs(slideView.getY()) != sh && animating){
-                    ViewCompat.postOnAnimationDelayed(slideView, new AnimActionOut(slideView, fadeView), 10);
+                if (Math.abs(viewPager.getY()) != sh && animating){
+                    ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
                 }
                 else{
                     onAnimationStop();
@@ -400,10 +398,10 @@ public class ImageBrowser {
         private class AnimActionBack extends AnimAction {
 
 
-            public AnimActionBack(View slideView, View fadeView) {
-                super(slideView, fadeView);
+            public AnimActionBack() {
+                super();
 
-                float s = -slideView.getY() / 6;
+                float s = -viewPager.getY() / 6;
                 if (Math.abs(s) < minStep){
                     if (s < 0){
                         step = -minStep;
@@ -418,15 +416,15 @@ public class ImageBrowser {
             }
             @Override
             public void run() {
-                int y = (int) (slideView.getY() + step);
+                int y = (int) (viewPager.getY() + step);
 
                 if (Math.abs(y) < Math.abs(step)){
                     y = 0;
                 }
-                slideView.setY(y);
+                viewPager.setY(y);
                 fade(y);
-                if (slideView.getY() != 0 && animating){
-                    ViewCompat.postOnAnimationDelayed(slideView, new AnimActionBack(slideView, fadeView), 10);
+                if (viewPager.getY() != 0 && animating){
+                    ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionBack(), 10);
                 }
             }
         }
@@ -464,9 +462,9 @@ public class ImageBrowser {
                     viewPager.setEnabled(true);
                     animating = true;
                     if (Math.abs(ev.getY() - startY) > dismissOffset) {
-                        viewPager.postOnAnimation(new AnimActionOut(viewPager, bgView));
+                        viewPager.postOnAnimation(new AnimActionOut());
                     } else {
-                        viewPager.postOnAnimation(new AnimActionBack(viewPager, bgView));
+                        viewPager.postOnAnimation(new AnimActionBack());
                     }
                     break;
             }
@@ -510,12 +508,14 @@ public class ImageBrowser {
                 if (images == null){
                     Glide.with(ImageActivity.this)
                             .load(path)
+                            .dontAnimate()
                             .placeholder(placeHolderImageRes)
                             .into(photoView);
                 }
                 else{
                     Glide.with(ImageActivity.this)
                             .load(path)
+                            .dontAnimate()
                             .placeholder(images.get(position).srcImageView.getDrawable())
                             .into(photoView);
                 }

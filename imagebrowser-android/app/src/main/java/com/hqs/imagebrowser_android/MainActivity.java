@@ -131,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
         image = new QImage();
         image.srcImageView = (PhotoView) findViewById(R.id.imageView0);
-        Glide.with(this).load("http://www.7x24home.com/upload/pics/beijing/2017/01/19/WX20160520991978SM991986/2017-01-19-103423564841.png")
+        Glide.with(this).load("https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1498709662&di=3cdeeaabdacac8a4bd2af6aa2a932577&src=http://img1c.xgo-img.com.cn/pics/159/158168.jpg")
                 .into((PhotoView) findViewById(R.id.imageView0));
-        image.filePath = "http://www.7x24home.com/upload/pics/beijing/2017/01/19/WX20160520991978SM991986/2017-01-19-103423564841.png";
+        image.filePath = "https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1498709662&di=3cdeeaabdacac8a4bd2af6aa2a932577&src=http://img1c.xgo-img.com.cn/pics/159/158168.jpg";
         arrayList.add(image);
 
         image = new QImage();
