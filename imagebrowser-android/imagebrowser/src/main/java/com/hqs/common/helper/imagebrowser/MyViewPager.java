@@ -28,4 +28,14 @@ public class MyViewPager extends ViewPager {
             return false;
         }
     }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (isEnabled()){
+            return super.dispatchTouchEvent(ev);
+        }
+        else{
+            return true;
+        }
+    }
 }
