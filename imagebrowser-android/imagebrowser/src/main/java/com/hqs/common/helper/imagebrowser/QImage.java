@@ -1,7 +1,5 @@
 package com.hqs.common.helper.imagebrowser;
 
-import android.widget.ImageView;
-
 import com.bm.library.PhotoView;
 
 /**
