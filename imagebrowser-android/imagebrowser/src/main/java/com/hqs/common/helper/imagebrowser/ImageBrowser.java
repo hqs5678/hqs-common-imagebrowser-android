@@ -45,7 +45,7 @@ public class ImageBrowser {
     public static int backgroundColorRes = -1;
     public static int animDuration = 200;
     private static ArrayList<QImage> images;
-    private static final int TOUCH_OFFSET = 40;
+    public static final int TOUCH_OFFSET = 120;
 
     /**
      * show
@@ -548,12 +548,14 @@ public class ImageBrowser {
 
         private boolean onGesture(MotionEvent ev) {
 
-            Log.print(ev.getX());
+//            Log.print(ev.getX());
 
             switch (ev.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     startY = ev.getY();
                     startX = ev.getX();
+                    Log.print("onGesture" + startX);
+
                     viewY = viewPager.getY();
                     viewX = viewPager.getX();
                     animating = false;
@@ -578,21 +580,22 @@ public class ImageBrowser {
                     }
                     else{
                         // 手指右滑
+                        if (!viewPager.isEnabled()){
+                            int left = (int) (ev.getX() - startX + viewX);
+                            if (Math.abs(left) > TOUCH_OFFSET && (orientation == -1 || orientation == LinearLayout.HORIZONTAL)) {
+                                viewPager.setEnabled(false);
+                                orientation = LinearLayout.HORIZONTAL;
+                                if (ev.getX() - startX > 0){
+                                    Log.print("x: " + (left - TOUCH_OFFSET));
+                                    viewPager.setX(left - TOUCH_OFFSET);
+                                }
+                                else{
+                                    viewPager.setX(left + TOUCH_OFFSET);
+                                }
 
-                        int left = (int) (ev.getX() - startX + viewX);
-                        if (Math.abs(left) > TOUCH_OFFSET && (orientation == -1 || orientation == LinearLayout.HORIZONTAL)) {
-                            viewPager.setEnabled(false);
-                            orientation = LinearLayout.HORIZONTAL;
-                            if (ev.getX() - startX > 0){
-                                viewPager.setX(left - TOUCH_OFFSET);
+                                float alpha = 1.0f - Math.abs((left - TOUCH_OFFSET) / sw);
+                                bgView.setAlpha(alpha);
                             }
-                            else{
-                                viewPager.setX(left + TOUCH_OFFSET);
-                            }
-                            viewPager.setEnabled(false);
-
-                            float alpha = 1.0f - Math.abs((left - TOUCH_OFFSET) / sw);
-                            bgView.setAlpha(alpha);
                         }
                     }
 

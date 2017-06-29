@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 
 import com.hqs.common.utils.Log;
 
+import static com.hqs.common.helper.imagebrowser.ImageBrowser.TOUCH_OFFSET;
+
 /**
  * Created by super on 2017/6/28.
  */
@@ -17,7 +19,6 @@ public class MyViewPager extends ViewPager {
 
     private float startX;
     private float sx;
-    private float offset = 100;
 
     public MyViewPager(Context context) {
         super(context);
@@ -46,12 +47,18 @@ public class MyViewPager extends ViewPager {
                 sx = getScrollX();
                 startX = ev.getX();
 
+                Log.print(startX);
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (getScrollX() == sx && startX + offset < ev.getX()){
-                    ((ViewGroup) this.getParent()).onInterceptTouchEvent(ev);
-                    return true;
+                if (ev.getX() > startX){
+                    if (getScrollX() == sx && startX + TOUCH_OFFSET < ev.getX()){
+//                        Log.print("dispatchTouchEvent view pager");
+                        setEnabled(false);
+                        ((ViewGroup) this.getParent()).onInterceptTouchEvent(ev);
+                        return false;
+                    }
                 }
+
                 break;
         }
         return super.dispatchTouchEvent(ev);
