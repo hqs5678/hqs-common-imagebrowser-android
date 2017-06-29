@@ -5,8 +5,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
-import com.hqs.common.utils.Log;
-
 /**
  * Created by super on 2017/1/23.
  */
@@ -37,36 +35,6 @@ public class ContentView extends RelativeLayout {
         }
     }
 
-
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent ev) {
-//        if (interceptListener != null) {
-//            return interceptListener.dispatchTouchEvent(ev);
-//        }
-//        else{
-//            return super.dispatchTouchEvent(ev);
-//        }
-//    }
-//
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        if (interceptListener != null) {
-//            if (this.isEnabled()) {
-//                return interceptListener.onTouchEvent(event);
-//            } else {
-//                return true;
-//            }
-//        }
-//        else{
-//            if (this.isEnabled()) {
-//                return super.onTouchEvent(event);
-//            } else {
-//                return true;
-//            }
-//        }
-//
-//    }
-
     public void setInterceptListener(InterceptListener interceptListener) {
         this.interceptListener = interceptListener;
     }
@@ -74,8 +42,4 @@ public class ContentView extends RelativeLayout {
 
 interface InterceptListener {
     boolean onInterceptTouchEvent(MotionEvent ev);
-
-    boolean onTouchEvent(MotionEvent event);
-
-    boolean dispatchTouchEvent(MotionEvent ev);
 }

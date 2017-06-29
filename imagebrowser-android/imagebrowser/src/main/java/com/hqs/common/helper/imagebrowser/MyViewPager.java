@@ -37,31 +37,4 @@ public class MyViewPager extends ViewPager {
             return false;
         }
     }
-
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-
-        switch (ev.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                sx = getScrollX();
-                startX = ev.getX();
-
-                Log.print(startX);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (ev.getX() > startX){
-                    if (getScrollX() == sx && startX + TOUCH_OFFSET < ev.getX()){
-//                        Log.print("dispatchTouchEvent view pager");
-                        setEnabled(false);
-                        ((ViewGroup) this.getParent()).onInterceptTouchEvent(ev);
-                        return false;
-                    }
-                }
-
-                break;
-        }
-        return super.dispatchTouchEvent(ev);
-    }
-
 }
