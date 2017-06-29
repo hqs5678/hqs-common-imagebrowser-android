@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.hqs.common.utils.Log;
 
@@ -14,6 +16,8 @@ import com.hqs.common.utils.Log;
 public class MyViewPager extends ViewPager {
 
     private float startX;
+    private float sx;
+    private float offset = 100;
 
     public MyViewPager(Context context) {
         super(context);
@@ -29,37 +33,28 @@ public class MyViewPager extends ViewPager {
             return super.onInterceptTouchEvent(ev);
         }
         else{
-            return true;
+            return false;
         }
     }
+
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        if (isEnabled()){
-            switch (ev.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    startX = ev.getX();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (ev.getX() - startX > 0){
-                        if (getScrollX() == 0){
-                            setEnabled(false);
-                            Log.print(ev.getX());
-                            return true;
-                        }
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    setEnabled(true);
-                    break;
-            }
-            return super.onTouchEvent(ev);
-        }
-        else{
-            return true;
-        }
-    }
+    public boolean dispatchTouchEvent(MotionEvent ev) {
 
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                sx = getScrollX();
+                startX = ev.getX();
+
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (getScrollX() == sx && startX + offset < ev.getX()){
+                    ((ViewGroup) this.getParent()).onInterceptTouchEvent(ev);
+                    return true;
+                }
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
 
 }

@@ -183,6 +183,11 @@ public class ImageBrowser {
 
                 @Override
                 public boolean onTouchEvent(MotionEvent event) {
+                    return false;
+                }
+
+                @Override
+                public boolean dispatchTouchEvent(MotionEvent ev) {
                     return true;
                 }
             });
@@ -416,7 +421,7 @@ public class ImageBrowser {
                 int x = (int) this.slideView.getX();
                 float s;
                 if (x > 0){
-                    s = (sh - x) / 6;
+                    s = (sw - x) / 6;
                 }
                 else{
                     s = -(this.slideView.getRight() + this.slideView.getX()) / 6;
@@ -543,6 +548,8 @@ public class ImageBrowser {
 
         private boolean onGesture(MotionEvent ev) {
 
+            Log.print(ev.getX());
+
             switch (ev.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     startY = ev.getY();
@@ -572,11 +579,9 @@ public class ImageBrowser {
                     else{
                         // 手指右滑
 
-                        if (viewPager.isEnabled()){
-                            return false;
-                        }
                         int left = (int) (ev.getX() - startX + viewX);
                         if (Math.abs(left) > TOUCH_OFFSET && (orientation == -1 || orientation == LinearLayout.HORIZONTAL)) {
+                            viewPager.setEnabled(false);
                             orientation = LinearLayout.HORIZONTAL;
                             if (ev.getX() - startX > 0){
                                 viewPager.setX(left - TOUCH_OFFSET);
