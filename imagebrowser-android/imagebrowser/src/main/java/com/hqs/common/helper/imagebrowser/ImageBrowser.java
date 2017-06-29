@@ -460,7 +460,7 @@ public class ImageBrowser {
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    
+
                     viewPager.setEnabled(true);
                     animating = true;
                     if (Math.abs(ev.getY() - startY) > dismissOffset) {
