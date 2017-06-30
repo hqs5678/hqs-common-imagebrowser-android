@@ -346,49 +346,37 @@ public class ImageBrowser {
             public AnimActionOut() {
                 super();
 
+                int position;
+                float s;
                 if (orientation == 0){
-                    int y = (int) viewPager.getY();
-                    float s;
-                    if (y > 0){
-                        s = (sh - y) / 6;
+                    position = (int) viewPager.getY();
+                    if (position > 0){
+                        s = (sh - position) / 6;
                     }
                     else{
                         s = -(viewPager.getBottom() + viewPager.getY()) / 6;
                     }
-
-                    if (Math.abs(s) < minStep){
-                        if (y < 0){
-                            step = -minStep;
-                        }
-                        else{
-                            step = minStep;
-                        }
-                    }
-                    else{
-                        step = (int) s;
-                    }
                 }
                 else{
-                    int x = (int) viewPager.getX();
-                    float s;
-                    if (x > 0){
-                        s = (sw - x) / 6;
+                    position = (int) viewPager.getX();
+                    if (position > 0){
+                        s = (sw - position) / 6;
                     }
                     else{
                         s = -(viewPager.getRight() + viewPager.getX()) / 6;
                     }
+                }
 
-                    if (Math.abs(s) < minStep){
-                        if (x < 0){
-                            step = -minStep;
-                        }
-                        else{
-                            step = minStep;
-                        }
+                if (Math.abs(s) < minStep){
+                    if (position < 0){
+                        step = -minStep;
                     }
                     else{
-                        step = (int) s;
+                        step = minStep;
                     }
+                }
+                else{
+                    step = (int) s;
                 }
 
             }
@@ -448,33 +436,24 @@ public class ImageBrowser {
             public AnimActionBack() {
                 super();
 
+                float s;
                 if (orientation == 0){
-                    float s = -viewPager.getY() / 6;
-                    if (Math.abs(s) < minStep){
-                        if (s < 0){
-                            step = -minStep;
-                        }
-                        else{
-                            step = minStep;
-                        }
+                    s = -viewPager.getY() / 6;
+                }
+                else{
+                    s = -viewPager.getX() / 6;
+                }
+
+                if (Math.abs(s) < minStep){
+                    if (s < 0){
+                        step = -minStep;
                     }
                     else{
-                        step = (int) s;
+                        step = minStep;
                     }
                 }
                 else{
-                    float s = -viewPager.getX() / 6;
-                    if (Math.abs(s) < minStep){
-                        if (s < 0){
-                            step = -minStep;
-                        }
-                        else{
-                            step = minStep;
-                        }
-                    }
-                    else{
-                        step = (int) s;
-                    }
+                    step = (int) s;
                 }
 
             }
