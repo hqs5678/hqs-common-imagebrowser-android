@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -486,6 +487,9 @@ public class ImageBrowser {
                     if (viewPager.getY() != 0 && animating){
                         ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionBack(), 10);
                     }
+                    else{
+                        orientation = -1;
+                    }
                 }
                 else{
                     int x = (int) (viewPager.getX() + step);
@@ -497,6 +501,9 @@ public class ImageBrowser {
                     fadeX(x);
                     if (viewPager.getX() != 0 && animating){
                         ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionBack(), 10);
+                    }
+                    else{
+                        orientation = -1;
                     }
                 }
             }
@@ -516,9 +523,18 @@ public class ImageBrowser {
 
                 case MotionEvent.ACTION_MOVE:
 
-                    moveVertical(ev);
-                    moveHorizontal(ev);
-
+                    if (orientation == -1){
+                        moveVertical(ev);
+                        moveHorizontal(ev);
+                    }
+                    else{
+                        if (orientation == 0){
+                            moveVertical(ev);
+                        }
+                        else{
+                            moveHorizontal(ev);
+                        }
+                    }
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -565,7 +581,9 @@ public class ImageBrowser {
         }
         private void moveHorizontal(MotionEvent ev){
             int left = (int) (ev.getX() - startX);
-            if (viewPager.getScrollX() == 0 && left > 0){
+            if ((viewPager.getCurrentItem() == 0 && left > 0 && Math.abs(left) > TOUCH_OFFSET)
+                    || (viewPager.getCurrentItem() + 1 == adapter.getCount()
+                        && left < 0 && Math.abs(left) > TOUCH_OFFSET)){
                 viewPager.setEnabled(false);
                 orientation = 1;
                 int x;
