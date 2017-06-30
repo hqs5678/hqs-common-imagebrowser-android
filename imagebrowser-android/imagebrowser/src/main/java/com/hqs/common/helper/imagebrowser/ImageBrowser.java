@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
-import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -106,6 +105,10 @@ public class ImageBrowser {
         private float startY;
         private boolean animating = false;
         private int dismissOffset = 0;
+        private float startX;
+        private int orientation = -1;
+        private boolean onTouching = false;
+        private int sign = 1;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +125,7 @@ public class ImageBrowser {
             }
             sw = ScreenUtils.screenW(this);
             sh = ScreenUtils.screenH(this);
-            dismissOffset = (int) (sw * 0.26);
+            dismissOffset = (int) (sw * 0.3);
 
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
@@ -318,6 +321,7 @@ public class ImageBrowser {
         private void onFinish(){
             // finish
             animating = true;
+            orientation = 0;
             viewPager.setY(-1);
             viewPager.postOnAnimation(new AnimActionOut());
         }
@@ -494,7 +498,7 @@ public class ImageBrowser {
                 else{
                     int x = (int) (viewPager.getX() + step);
 
-                    if (Math.abs(x) < 0){
+                    if (Math.abs(x) < Math.abs(step)){
                         x = 0;
                     }
                     viewPager.setX(x);
@@ -508,9 +512,6 @@ public class ImageBrowser {
                 }
             }
         }
-
-        private float startX;
-        private int orientation = -1;
 
         private boolean onGesture(MotionEvent ev) {
 
@@ -542,7 +543,7 @@ public class ImageBrowser {
                         }
                     }
                     else{
-                        if (Math.abs(ev.getX() - startX) > dismissOffset * 0.6) {
+                        if (Math.abs(ev.getX() - startX) > dismissOffset * 0.8) {
                             viewPager.postOnAnimation(new AnimActionOut());
                         } else {
                             viewPager.postOnAnimation(new AnimActionBack());
@@ -556,8 +557,6 @@ public class ImageBrowser {
             return false;
         }
 
-        private boolean onTouching = false;
-        private int sign = 1;
         private boolean moveVertical(MotionEvent ev){
             int top = (int) (ev.getY() - startY);
             if (Math.abs(top) > TOUCH_OFFSET && !onTouching && orientation != 1){
