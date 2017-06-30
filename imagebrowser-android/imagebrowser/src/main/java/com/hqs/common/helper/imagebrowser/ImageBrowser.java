@@ -103,9 +103,12 @@ public class ImageBrowser {
         private float sh;
         private ImageView.ScaleType scaleType = ImageView.ScaleType.FIT_CENTER;
         private float startY;
-        private float viewY;
         private boolean animating = false;
         private int dismissOffset = 0;
+        private float startX;
+        private int orientation = -1;
+        private boolean onTouching = false;
+        private int sign = 1;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +125,7 @@ public class ImageBrowser {
             }
             sw = ScreenUtils.screenW(this);
             sh = ScreenUtils.screenH(this);
-            dismissOffset = (int) (sw * 0.26);
+            dismissOffset = (int) (sw * 0.3);
 
             mHandler = new Handler();
             filePaths = extras.getStringArrayList("filePaths");
@@ -318,6 +321,7 @@ public class ImageBrowser {
         private void onFinish(){
             // finish
             animating = true;
+            orientation = 0;
             viewPager.setY(-1);
             viewPager.postOnAnimation(new AnimActionOut());
         }
@@ -334,12 +338,6 @@ public class ImageBrowser {
             public void run() {
 
             }
-
-            public void fade(int y){
-                float alpha = 1.0f - Math.abs(y / sh);
-                bgView.setAlpha(alpha);
-                tvIndex.setAlpha(alpha);
-            }
         }
 
         // 甩出动画
@@ -348,17 +346,29 @@ public class ImageBrowser {
             public AnimActionOut() {
                 super();
 
-                int y = (int) viewPager.getY();
+                int position;
                 float s;
-                if (y > 0){
-                    s = (sh - y) / 6;
+                if (orientation == 0){
+                    position = (int) viewPager.getY();
+                    if (position > 0){
+                        s = (sh - position) / 6;
+                    }
+                    else{
+                        s = -(viewPager.getBottom() + viewPager.getY()) / 6;
+                    }
                 }
                 else{
-                    s = -(viewPager.getBottom() + viewPager.getY()) / 6;
+                    position = (int) viewPager.getX();
+                    if (position > 0){
+                        s = (sw - position) / 6;
+                    }
+                    else{
+                        s = -(viewPager.getRight() + viewPager.getX()) / 6;
+                    }
                 }
 
                 if (Math.abs(s) < minStep){
-                    if (y < 0){
+                    if (position < 0){
                         step = -minStep;
                     }
                     else{
@@ -368,28 +378,53 @@ public class ImageBrowser {
                 else{
                     step = (int) s;
                 }
+
             }
             @Override
             public void run() {
-                int y = (int) (viewPager.getY() + step);
-                if (step > 0){
-                    if (y > sh){
-                        y = (int) sh;
+                if (orientation == 0){
+                    int y = (int) (viewPager.getY() + step);
+                    if (step > 0){
+                        if (y > sh){
+                            y = (int) sh;
+                        }
+                    }
+                    else{
+                        if (y < -sh){
+                            y = (int) -sh;
+                        }
+                    }
+                    viewPager.setY(y);
+                    fadeY(y);
+                    if (Math.abs(viewPager.getY()) != sh && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
+                    }
+                    else{
+                        onAnimationStop();
                     }
                 }
                 else{
-                    if (y < -sh){
-                        y = (int) -sh;
+                    int x = (int) (viewPager.getX() + step);
+                    if (step > 0){
+                        if (x > sw){
+                            x = (int) sw;
+                        }
+                    }
+                    else{
+                        if (x < -sw){
+                            x = (int) -sw;
+                        }
+                    }
+                    viewPager.setX(x);
+                    fadeX(x);
+                    if (Math.abs(viewPager.getX()) != sw && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
+                    }
+                    else{
+                        onAnimationStop();
                     }
                 }
-                viewPager.setY(y);
-                fade(y);
-                if (Math.abs(viewPager.getY()) != sh && animating){
-                    ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
-                }
-                else{
-                    onAnimationStop();
-                }
+
             }
 
         }
@@ -401,7 +436,14 @@ public class ImageBrowser {
             public AnimActionBack() {
                 super();
 
-                float s = -viewPager.getY() / 6;
+                float s;
+                if (orientation == 0){
+                    s = -viewPager.getY() / 6;
+                }
+                else{
+                    s = -viewPager.getX() / 6;
+                }
+
                 if (Math.abs(s) < minStep){
                     if (s < 0){
                         step = -minStep;
@@ -413,18 +455,39 @@ public class ImageBrowser {
                 else{
                     step = (int) s;
                 }
+
             }
             @Override
             public void run() {
-                int y = (int) (viewPager.getY() + step);
+                if (orientation == 0){
+                    int y = (int) (viewPager.getY() + step);
 
-                if (Math.abs(y) < Math.abs(step)){
-                    y = 0;
+                    if (Math.abs(y) < Math.abs(step)){
+                        y = 0;
+                    }
+                    viewPager.setY(y);
+                    fadeY(y);
+                    if (viewPager.getY() != 0 && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionBack(), 10);
+                    }
+                    else{
+                        orientation = -1;
+                    }
                 }
-                viewPager.setY(y);
-                fade(y);
-                if (viewPager.getY() != 0 && animating){
-                    ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionBack(), 10);
+                else{
+                    int x = (int) (viewPager.getX() + step);
+
+                    if (Math.abs(x) < Math.abs(step)){
+                        x = 0;
+                    }
+                    viewPager.setX(x);
+                    fadeX(x);
+                    if (viewPager.getX() != 0 && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionBack(), 10);
+                    }
+                    else{
+                        orientation = -1;
+                    }
                 }
             }
         }
@@ -434,24 +497,19 @@ public class ImageBrowser {
             switch (ev.getAction()){
                 case MotionEvent.ACTION_DOWN:
                     startY = ev.getY();
-                    viewY = viewPager.getY();
+                    startX = ev.getX();
                     animating = false;
                     break;
 
                 case MotionEvent.ACTION_MOVE:
 
-                    int top = (int) (ev.getY() - startY + viewY);
-                    if (Math.abs(top) > TOUCH_OFFSET){
-                        if (ev.getY() - startY > 0){
-                            viewPager.setY(top - TOUCH_OFFSET);
-                        }
-                        else{
-                            viewPager.setY(top + TOUCH_OFFSET);
-                        }
+                    if (viewPager.getCurrentItem() == 0 && ev.getX() - startX > 0
+                            || viewPager.getCurrentItem() + 1 == adapter.getCount() && ev.getX() - startX < 0){
                         viewPager.setEnabled(false);
+                    }
 
-                        float alpha = 1.0f - Math.abs((top - TOUCH_OFFSET) / sh);
-                        bgView.setAlpha(alpha);
+                    if (!moveVertical(ev)){
+                        moveHorizontal(ev);
                     }
 
                     break;
@@ -461,15 +519,79 @@ public class ImageBrowser {
 
                     viewPager.setEnabled(true);
                     animating = true;
-                    if (Math.abs(ev.getY() - startY) > dismissOffset) {
-                        viewPager.postOnAnimation(new AnimActionOut());
-                    } else {
-                        viewPager.postOnAnimation(new AnimActionBack());
+                    if (orientation == 0){
+                        if (Math.abs(ev.getY() - startY) > dismissOffset) {
+                            viewPager.postOnAnimation(new AnimActionOut());
+                        } else {
+                            viewPager.postOnAnimation(new AnimActionBack());
+                        }
                     }
+                    else{
+                        if (Math.abs(ev.getX() - startX) > dismissOffset * 0.8) {
+                            viewPager.postOnAnimation(new AnimActionOut());
+                        } else {
+                            viewPager.postOnAnimation(new AnimActionBack());
+                        }
+                    }
+                    onTouching = false;
+
                     break;
             }
 
             return false;
+        }
+
+        private boolean moveVertical(MotionEvent ev){
+            int top = (int) (ev.getY() - startY);
+            if (Math.abs(top) > TOUCH_OFFSET && !onTouching && orientation != 1){
+                viewPager.setEnabled(false);
+                orientation = 0;
+                onTouching = true;
+
+                if (top > 0){
+                    sign = -1;
+                }
+                else{
+                    sign = 1;
+                }
+            }
+            if (onTouching){
+                int y = top + TOUCH_OFFSET * sign;
+
+                viewPager.setY(y);
+                fadeY(y);
+            }
+            return orientation == 0;
+        }
+        private void moveHorizontal(MotionEvent ev){
+            int left = (int) (ev.getX() - startX);
+            if ((viewPager.getCurrentItem() == 0 && left > 0 && Math.abs(left) > TOUCH_OFFSET)
+                    || (viewPager.getCurrentItem() + 1 == adapter.getCount()
+                        && left < 0 && Math.abs(left) > TOUCH_OFFSET)){
+                viewPager.setEnabled(false);
+                orientation = 1;
+                int x;
+                if (left > 0){
+                    x = left - TOUCH_OFFSET;
+                }
+                else{
+                    x = left + TOUCH_OFFSET;
+                }
+                viewPager.setX(x);
+                fadeX(x);
+            }
+        }
+
+        private void fadeY(int y){
+            float alpha = 1.0f - Math.abs(y / sh);
+            bgView.setAlpha(alpha);
+            tvIndex.setAlpha(alpha);
+        }
+
+        private void fadeX(int x){
+            float alpha = 1.0f - Math.abs(x / sw);
+            bgView.setAlpha(alpha);
+            tvIndex.setAlpha(alpha);
         }
 
         class MyPageAdapter extends PagerAdapter {
