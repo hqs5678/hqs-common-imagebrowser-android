@@ -503,6 +503,11 @@ public class ImageBrowser {
 
                 case MotionEvent.ACTION_MOVE:
 
+                    if (viewPager.getCurrentItem() == 0 && ev.getX() - startX > 0
+                            || viewPager.getCurrentItem() + 1 == adapter.getCount() && ev.getX() - startX < 0){
+                        viewPager.setEnabled(false);
+                    }
+
                     if (!moveVertical(ev)){
                         moveHorizontal(ev);
                     }
