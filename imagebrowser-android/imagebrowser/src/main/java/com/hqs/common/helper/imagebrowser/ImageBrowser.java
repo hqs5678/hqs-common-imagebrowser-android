@@ -523,18 +523,10 @@ public class ImageBrowser {
 
                 case MotionEvent.ACTION_MOVE:
 
-                    if (orientation == -1){
-                        moveVertical(ev);
+                    if (!moveVertical(ev)){
                         moveHorizontal(ev);
                     }
-                    else{
-                        if (orientation == 0){
-                            moveVertical(ev);
-                        }
-                        else{
-                            moveHorizontal(ev);
-                        }
-                    }
+
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -556,6 +548,7 @@ public class ImageBrowser {
                             viewPager.postOnAnimation(new AnimActionBack());
                         }
                     }
+                    onTouching = false;
 
                     break;
             }
@@ -563,21 +556,29 @@ public class ImageBrowser {
             return false;
         }
 
-        private void moveVertical(MotionEvent ev){
+        private boolean onTouching = false;
+        private int sign = 1;
+        private boolean moveVertical(MotionEvent ev){
             int top = (int) (ev.getY() - startY);
-            if (Math.abs(top) > TOUCH_OFFSET){
+            if (Math.abs(top) > TOUCH_OFFSET && !onTouching && orientation != 1){
                 viewPager.setEnabled(false);
                 orientation = 0;
-                int y;
+                onTouching = true;
+
                 if (top > 0){
-                    y = top - TOUCH_OFFSET;
+                    sign = -1;
                 }
                 else{
-                    y = top + TOUCH_OFFSET;
+                    sign = 1;
                 }
+            }
+            if (onTouching){
+                int y = top + TOUCH_OFFSET * sign;
+
                 viewPager.setY(y);
                 fadeY(y);
             }
+            return orientation == 0;
         }
         private void moveHorizontal(MotionEvent ev){
             int left = (int) (ev.getX() - startX);
