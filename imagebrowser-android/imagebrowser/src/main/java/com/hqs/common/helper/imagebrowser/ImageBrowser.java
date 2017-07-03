@@ -2,6 +2,7 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -109,6 +110,8 @@ public class ImageBrowser {
         private int orientation = -1;
         private boolean onTouching = false;
         private int sign = 1;
+        // 垂直动画时图片的高度(上空白高度 + 图片有效高度)
+        private HashMap<String, Float> heights = new HashMap<>();
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -159,20 +162,10 @@ public class ImageBrowser {
 
                     if (ev.getPointerCount() == 1){
                         PhotoView photoView = adapter.getView(viewPager.getCurrentItem());
-                        Info info = photoView.getInfo();
 
-                        try {
-                            Class cls = info.getClass();
-                            Field field = cls.getDeclaredField("mScale");
-                            field.setAccessible(true);
-
-                            float scale = (float) field.get(info);
-                            if (scale == 1.0){
-                                return onGesture(ev);
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        float scale = getScale(photoView);
+                        if (scale == 1.0) {
+                            return onGesture(ev);
                         }
                     }
                     return false;
@@ -326,9 +319,94 @@ public class ImageBrowser {
             viewPager.postOnAnimation(new AnimActionOut());
         }
 
+        private float getScale(PhotoView p){
+            try {
+                Info info = p.getInfo();
+                Class cls = info.getClass();
+                Field field = cls.getDeclaredField("mScale");
+                field.setAccessible(true);
+                float scale = (float) field.get(info);
+                return scale;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 1;
+            }
+        }
+
+        private int getOrientation(PhotoView p){
+            try {
+                Info info = p.getInfo();
+                Class cls = info.getClass();
+                Field field = cls.getDeclaredField("mDegrees");
+                field.setAccessible(true);
+                float mDegrees = (float) field.get(info);
+                if (mDegrees % 180 == 0){
+                    // vertical
+                    return 0;
+                }
+                else{
+                    // horizontal
+                    return 1;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                // vertical
+                return 0;
+            }
+        }
+
+        private float getH(float height){
+            if (height <= 0){
+                PhotoView p = adapter.getView(viewPager.getCurrentItem());
+                float scale = getScale(p);
+                int ort = getOrientation(p);
+                Float f = heights.get(viewPager.getCurrentItem() + "-" + ort + "-" + scale);
+                if (f != null){
+                    height = f;
+                }
+                if (height > 0){
+                    return height;
+                }
+                // 重新计算
+//                Log.print("getH  calculate ");
+                try {
+                    if (ort == 0){
+                        // orientation == vertical
+
+                        Rect rect = p.getDrawable().getBounds();
+                        float h = scale * rect.height() * sw / rect.width();
+                        if (h > sh){
+                            height = sh;
+                        }
+                        else{
+                            height = (sh - h) * 0.5f + h;
+                        }
+                    }
+                    else{
+                        // orientation == horizontal
+
+                        float h = scale * sw;
+                        if (h > sh){
+                            height = sh;
+                        }
+                        else{
+                            height = (sh - h) * 0.5f + h;
+                        }
+                    }
+
+                } catch (Exception e) {
+                    height = sh;
+                }
+                heights.put(viewPager.getCurrentItem() + "-" + ort + "-" + scale, height);
+            }
+            return height;
+        }
+
         // 动画基类
         private class AnimAction implements Runnable {
 
+            public float k = 6;
             int step;
             final int minStep = 3;
 
@@ -343,27 +421,39 @@ public class ImageBrowser {
         // 甩出动画
         private class AnimActionOut extends AnimAction {
 
+            float height = 0;
+
+            public AnimActionOut(float height){
+                this.height = height;
+                init();
+            }
+
             public AnimActionOut() {
                 super();
+                init();
+            }
 
+            private void init(){
                 int position;
                 float s;
                 if (orientation == 0){
+                    height = getH(height);
+
                     position = (int) viewPager.getY();
                     if (position > 0){
-                        s = (sh - position) / 6;
+                        s = (height - position) / k;
                     }
                     else{
-                        s = -(viewPager.getBottom() + viewPager.getY()) / 6;
+                        s = -(height + position) / k;
                     }
                 }
                 else{
                     position = (int) viewPager.getX();
                     if (position > 0){
-                        s = (sw - position) / 6;
+                        s = (sw - position) / k;
                     }
                     else{
-                        s = -(viewPager.getRight() + viewPager.getX()) / 6;
+                        s = -(viewPager.getRight() + position) / k;
                     }
                 }
 
@@ -378,26 +468,25 @@ public class ImageBrowser {
                 else{
                     step = (int) s;
                 }
-
             }
             @Override
             public void run() {
                 if (orientation == 0){
                     int y = (int) (viewPager.getY() + step);
                     if (step > 0){
-                        if (y > sh){
-                            y = (int) sh;
+                        if (y > height){
+                            y = (int) height;
                         }
                     }
                     else{
-                        if (y < -sh){
-                            y = (int) -sh;
+                        if (y < -height){
+                            y = (int) -height;
                         }
                     }
                     viewPager.setY(y);
                     fadeY(y);
-                    if (Math.abs(viewPager.getY()) != sh && animating){
-                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
+                    if (Math.abs(y) != (int) height && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(height), 10);
                     }
                     else{
                         onAnimationStop();
@@ -417,7 +506,7 @@ public class ImageBrowser {
                     }
                     viewPager.setX(x);
                     fadeX(x);
-                    if (Math.abs(viewPager.getX()) != sw && animating){
+                    if (Math.abs(x) != (int) sw && animating){
                         ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
                     }
                     else{
@@ -438,10 +527,10 @@ public class ImageBrowser {
 
                 float s;
                 if (orientation == 0){
-                    s = -viewPager.getY() / 6;
+                    s = -viewPager.getY() / k;
                 }
                 else{
-                    s = -viewPager.getX() / 6;
+                    s = -viewPager.getX() / k;
                 }
 
                 if (Math.abs(s) < minStep){
@@ -583,7 +672,8 @@ public class ImageBrowser {
         }
 
         private void fadeY(int y){
-            float alpha = 1.0f - Math.abs(y / sh);
+            float height = getH(0);
+            float alpha = 1.0f - Math.abs(y / height);
             bgView.setAlpha(alpha);
             tvIndex.setAlpha(alpha);
         }
@@ -616,15 +706,14 @@ public class ImageBrowser {
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
 
-                PhotoView p;
+                PhotoView photoView;
                 if (destroyedView != null){
-                    p = destroyedView;
+                    photoView = destroyedView;
                     destroyedView = null;
                 }
                 else{
-                    p = getView();
+                    photoView = getView();
                 }
-                final PhotoView photoView = p;
 
                 String path = filePaths.get(position);
                 if (images == null){
@@ -665,7 +754,7 @@ public class ImageBrowser {
                 // 启用图片缩放功能
                 photoView.enable();
                 photoView.setAnimaDuring(300);
-                photoView.setMaxScale(6);
+                photoView.setMaxScale(5);
                 photoView.setInterpolator(new DecelerateInterpolator());
                 photoView.setScaleType(scaleType);
                 return photoView;
