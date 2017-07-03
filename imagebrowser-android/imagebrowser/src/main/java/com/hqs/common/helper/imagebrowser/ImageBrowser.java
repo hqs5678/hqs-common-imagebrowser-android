@@ -375,11 +375,15 @@ public class ImageBrowser {
 
             public AnimActionOut(float height){
                 this.height = height;
+                init();
             }
 
             public AnimActionOut() {
                 super();
+                init();
+            }
 
+            private void init(){
                 int position;
                 float s;
                 if (orientation == 0){
@@ -414,7 +418,6 @@ public class ImageBrowser {
                 else{
                     step = (int) s;
                 }
-
             }
             @Override
             public void run() {
@@ -432,8 +435,8 @@ public class ImageBrowser {
                     }
                     viewPager.setY(y);
                     fadeY(y);
-                    if (Math.abs(viewPager.getY()) != height && animating){
-                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
+                    if (Math.abs(y) != (int) height && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(height), 10);
                     }
                     else{
                         onAnimationStop();
@@ -453,8 +456,8 @@ public class ImageBrowser {
                     }
                     viewPager.setX(x);
                     fadeX(x);
-                    if (Math.abs(viewPager.getX()) != sw && animating){
-                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(height), 10);
+                    if (Math.abs(x) != (int) sw && animating){
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
                     }
                     else{
                         onAnimationStop();
