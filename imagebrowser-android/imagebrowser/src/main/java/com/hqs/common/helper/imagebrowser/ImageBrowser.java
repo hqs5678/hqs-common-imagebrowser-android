@@ -2,6 +2,7 @@ package com.hqs.common.helper.imagebrowser;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -110,6 +111,8 @@ public class ImageBrowser {
         private int orientation = -1;
         private boolean onTouching = false;
         private int sign = 1;
+        // 垂直动画时图片的高度(上空白高度 + 图片有效高度)
+        private HashMap<Integer, Float> heights = new HashMap<>();
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -327,6 +330,30 @@ public class ImageBrowser {
             viewPager.postOnAnimation(new AnimActionOut());
         }
 
+        private float getH(float height){
+            if (height <= 0){
+                try {
+                    Float f = heights.get(viewPager.getCurrentItem());
+                    if (f != null){
+                        height = f;
+                    }
+                    if (height <= 0) {
+                        PhotoView p = adapter.getView(viewPager.getCurrentItem());
+
+                        Rect rect = p.getDrawable().getBounds();
+                        float h = rect.height() * sw / rect.width();
+                        height = (sh - h) * 0.5f + h;
+
+                        Log.print("getH  calculate ");
+                    }
+                } catch (Exception e) {
+                    height = sh;
+                }
+                heights.put(viewPager.getCurrentItem(), height);
+            }
+            return height;
+        }
+
         // 动画基类
         private class AnimAction implements Runnable {
 
@@ -344,18 +371,26 @@ public class ImageBrowser {
         // 甩出动画
         private class AnimActionOut extends AnimAction {
 
+            float height = 0;
+
+            public AnimActionOut(float height){
+                this.height = height;
+            }
+
             public AnimActionOut() {
                 super();
 
                 int position;
                 float s;
                 if (orientation == 0){
+                    height = getH(height);
+
                     position = (int) viewPager.getY();
                     if (position > 0){
-                        s = (sh - position) / 6;
+                        s = (height - position) / 6;
                     }
                     else{
-                        s = -(viewPager.getBottom() + viewPager.getY()) / 6;
+                        s = -(height + position) / 6;
                     }
                 }
                 else{
@@ -364,7 +399,7 @@ public class ImageBrowser {
                         s = (sw - position) / 6;
                     }
                     else{
-                        s = -(viewPager.getRight() + viewPager.getX()) / 6;
+                        s = -(viewPager.getRight() + position) / 6;
                     }
                 }
 
@@ -386,18 +421,18 @@ public class ImageBrowser {
                 if (orientation == 0){
                     int y = (int) (viewPager.getY() + step);
                     if (step > 0){
-                        if (y > sh){
-                            y = (int) sh;
+                        if (y > height){
+                            y = (int) height;
                         }
                     }
                     else{
-                        if (y < -sh){
-                            y = (int) -sh;
+                        if (y < -height){
+                            y = (int) -height;
                         }
                     }
                     viewPager.setY(y);
                     fadeY(y);
-                    if (Math.abs(viewPager.getY()) != sh && animating){
+                    if (Math.abs(viewPager.getY()) != height && animating){
                         ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
                     }
                     else{
@@ -419,7 +454,7 @@ public class ImageBrowser {
                     viewPager.setX(x);
                     fadeX(x);
                     if (Math.abs(viewPager.getX()) != sw && animating){
-                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(), 10);
+                        ViewCompat.postOnAnimationDelayed(viewPager, new AnimActionOut(height), 10);
                     }
                     else{
                         onAnimationStop();
@@ -584,7 +619,8 @@ public class ImageBrowser {
         }
 
         private void fadeY(int y){
-            float alpha = 1.0f - Math.abs(y / sh);
+            float height = getH(0);
+            float alpha = 1.0f - Math.abs(y / height);
             bgView.setAlpha(alpha);
             tvIndex.setAlpha(alpha);
         }
