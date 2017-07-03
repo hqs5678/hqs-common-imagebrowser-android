@@ -406,6 +406,7 @@ public class ImageBrowser {
         // 动画基类
         private class AnimAction implements Runnable {
 
+            public float k = 6;
             int step;
             final int minStep = 3;
 
@@ -440,19 +441,19 @@ public class ImageBrowser {
 
                     position = (int) viewPager.getY();
                     if (position > 0){
-                        s = (height - position) / 6;
+                        s = (height - position) / k;
                     }
                     else{
-                        s = -(height + position) / 6;
+                        s = -(height + position) / k;
                     }
                 }
                 else{
                     position = (int) viewPager.getX();
                     if (position > 0){
-                        s = (sw - position) / 6;
+                        s = (sw - position) / k;
                     }
                     else{
-                        s = -(viewPager.getRight() + position) / 6;
+                        s = -(viewPager.getRight() + position) / k;
                     }
                 }
 
@@ -526,10 +527,10 @@ public class ImageBrowser {
 
                 float s;
                 if (orientation == 0){
-                    s = -viewPager.getY() / 6;
+                    s = -viewPager.getY() / k;
                 }
                 else{
-                    s = -viewPager.getX() / 6;
+                    s = -viewPager.getX() / k;
                 }
 
                 if (Math.abs(s) < minStep){
@@ -753,7 +754,7 @@ public class ImageBrowser {
                 // 启用图片缩放功能
                 photoView.enable();
                 photoView.setAnimaDuring(300);
-                photoView.setMaxScale(6);
+                photoView.setMaxScale(5);
                 photoView.setInterpolator(new DecelerateInterpolator());
                 photoView.setScaleType(scaleType);
                 return photoView;
