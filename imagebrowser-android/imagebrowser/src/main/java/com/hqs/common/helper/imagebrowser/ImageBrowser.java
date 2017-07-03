@@ -25,7 +25,6 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
-import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -112,7 +111,7 @@ public class ImageBrowser {
         private boolean onTouching = false;
         private int sign = 1;
         // 垂直动画时图片的高度(上空白高度 + 图片有效高度)
-        private HashMap<Integer, Float> heights = new HashMap<>();
+        private HashMap<String, Float> heights = new HashMap<>();
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -163,20 +162,10 @@ public class ImageBrowser {
 
                     if (ev.getPointerCount() == 1){
                         PhotoView photoView = adapter.getView(viewPager.getCurrentItem());
-                        Info info = photoView.getInfo();
 
-                        try {
-                            Class cls = info.getClass();
-                            Field field = cls.getDeclaredField("mScale");
-                            field.setAccessible(true);
-
-                            float scale = (float) field.get(info);
-                            if (scale == 1.0){
-                                return onGesture(ev);
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        float scale = getScale(photoView);
+                        if (scale == 1.0) {
+                            return onGesture(ev);
                         }
                     }
                     return false;
@@ -330,26 +319,86 @@ public class ImageBrowser {
             viewPager.postOnAnimation(new AnimActionOut());
         }
 
+        private float getScale(PhotoView p){
+            try {
+                Info info = p.getInfo();
+                Class cls = info.getClass();
+                Field field = cls.getDeclaredField("mScale");
+                field.setAccessible(true);
+                float scale = (float) field.get(info);
+                return scale;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return 1;
+            }
+        }
+
+        private int getOrientation(PhotoView p){
+            try {
+                Info info = p.getInfo();
+                Class cls = info.getClass();
+                Field field = cls.getDeclaredField("mDegrees");
+                field.setAccessible(true);
+                float mDegrees = (float) field.get(info);
+                if (mDegrees % 180 == 0){
+                    // vertical
+                    return 0;
+                }
+                else{
+                    // horizontal
+                    return 1;
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                // vertical
+                return 0;
+            }
+        }
+
         private float getH(float height){
             if (height <= 0){
+                PhotoView p = adapter.getView(viewPager.getCurrentItem());
+                float scale = getScale(p);
+                int ort = getOrientation(p);
+                Float f = heights.get(viewPager.getCurrentItem() + "-" + ort + "-" + scale);
+                if (f != null){
+                    height = f;
+                }
+                if (height > 0){
+                    return height;
+                }
+                // 重新计算
+//                Log.print("getH  calculate ");
                 try {
-                    Float f = heights.get(viewPager.getCurrentItem());
-                    if (f != null){
-                        height = f;
-                    }
-                    if (height <= 0) {
-                        PhotoView p = adapter.getView(viewPager.getCurrentItem());
+                    if (ort == 0){
+                        // orientation == vertical
 
                         Rect rect = p.getDrawable().getBounds();
-                        float h = rect.height() * sw / rect.width();
-                        height = (sh - h) * 0.5f + h;
-
-                        Log.print("getH  calculate ");
+                        float h = scale * rect.height() * sw / rect.width();
+                        if (h > sh){
+                            height = sh;
+                        }
+                        else{
+                            height = (sh - h) * 0.5f + h;
+                        }
                     }
+                    else{
+                        // orientation == horizontal
+
+                        float h = scale * sw;
+                        if (h > sh){
+                            height = sh;
+                        }
+                        else{
+                            height = (sh - h) * 0.5f + h;
+                        }
+                    }
+
                 } catch (Exception e) {
                     height = sh;
                 }
-                heights.put(viewPager.getCurrentItem(), height);
+                heights.put(viewPager.getCurrentItem() + "-" + ort + "-" + scale, height);
             }
             return height;
         }
