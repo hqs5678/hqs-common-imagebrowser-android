@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.bm.library.Info;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
+import com.hqs.common.utils.Log;
 import com.hqs.common.utils.ScreenUtils;
 import com.hqs.common.utils.StatusBarUtil;
 import com.hqs.common.utils.ViewUtil;
@@ -616,15 +617,14 @@ public class ImageBrowser {
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
 
-                PhotoView p;
+                PhotoView photoView;
                 if (destroyedView != null){
-                    p = destroyedView;
+                    photoView = destroyedView;
                     destroyedView = null;
                 }
                 else{
-                    p = getView();
+                    photoView = getView();
                 }
-                final PhotoView photoView = p;
 
                 String path = filePaths.get(position);
                 if (images == null){
