@@ -35,7 +35,15 @@ import java.util.HashMap;
 
 /**
  * Created by apple on 2016/11/3.
+ *
+ *
+ * 注意事项:
+ *      在 app/proguard-rules.pro 中添加如下:
+ *      -keep class com.bm.library.** {*;}
+ *
  */
+
+
 
 public class ImageBrowser {
 
