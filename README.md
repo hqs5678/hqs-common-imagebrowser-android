@@ -33,7 +33,11 @@ public void showImage(int index){
     QImage image;
     ArrayList<QImage> arrayList = new ArrayList<>();
 
-    // QImage 中filePath 可以是 URL, 也可以是本地图片绝对路径
+    // QImage 中filePath 可以是 URL, 也可以是本地图片绝对路径, 如果仅仅为本地图片, filepath 可以不用设置
+    // 点击的哪个图片即即将要显示的那个图片需要的srcImageView 的rect一定要有, 其他的可以是模拟的, 例如:
+    // PhotoView pview = new PhotoView(this);
+    // pview.setImage...     ;
+    // qimg.srcImageView = pview;
     
     image = new QImage();
     image.srcImageView = (PhotoView) findViewById(R.id.image10);
