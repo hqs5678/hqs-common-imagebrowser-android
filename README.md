@@ -1,6 +1,6 @@
 # Android 图片浏览器
 
-简单的Android图片浏览器, 支持本地图片和在线图片
+简单的Android图片浏览器, 支持本地图片和网络图片
 ##### 运行效果图
 ![运行效果图](https://github.com/hqs5678/hqs-common-imagebrowser-android/blob/master/2017-07-06%2016_29_35.gif)
 
