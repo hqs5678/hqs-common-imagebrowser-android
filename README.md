@@ -17,3 +17,38 @@
 -keep class com.bm.library.** {*;}
 ```
 
+## 使用方法
+```
+public void showImage(int index){
+
+    // 设置占位图片
+    ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
+    // 设置浏览时背景颜色
+    ImageBrowser.backgroundColorRes = R.color.colorAccent;
+    // 开始时缩放时的时长
+    ImageBrowser.animDuration = 200;
+
+    // 添加图片
+    
+    QImage image;
+    ArrayList<QImage> arrayList = new ArrayList<>();
+
+    image = new QImage();
+    image.srcImageView = (PhotoView) findViewById(R.id.image10);
+    arrayList.add(image);
+
+    image = new QImage();
+    image.srcImageView = (PhotoView) findViewById(R.id.image11);
+    arrayList.add(image);
+
+    image = new QImage();
+    image.srcImageView = (PhotoView) findViewById(R.id.image12);
+    arrayList.add(image);
+        
+    .
+    .
+    .
+
+    ImageBrowser.showWithImages(this, arrayList, index);
+}
+```
