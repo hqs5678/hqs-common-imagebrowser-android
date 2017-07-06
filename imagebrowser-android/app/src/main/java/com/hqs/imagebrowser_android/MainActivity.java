@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        Glide.with(this).load("https://www.7x24home.com:8889/upload/pics/beijing/2017/06/19/WX20170420657648SM657685test/f751332f-4ad1-4d40-ba95-f910f8ea10e0/2017-06-19-104805418574.png")
+                .into((PhotoView) findViewById(R.id.imageView0));
+
         LogReport.getInstance()
                 .setCacheSize(30 * 1024 * 1024)//支持设置缓存大小，超出后清空
                 .setLogDir(getApplicationContext(), "sdcard/" + this.getString(this.getApplicationInfo().labelRes) + "/")//定义路径为：sdcard/[app name]/
@@ -131,8 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         image = new QImage();
         image.srcImageView = (PhotoView) findViewById(R.id.imageView0);
-        Glide.with(this).load("https://www.7x24home.com:8889/upload/pics/beijing/2017/06/19/WX20170420657648SM657685test/f751332f-4ad1-4d40-ba95-f910f8ea10e0/2017-06-19-104805418574.png")
-                .into((PhotoView) findViewById(R.id.imageView0));
+
         image.filePath = "https://www.7x24home.com:8889/upload/pics/beijing/2017/06/19/WX20170420657648SM657685test/f751332f-4ad1-4d40-ba95-f910f8ea10e0/2017-06-19-104805418574.png";
         arrayList.add(image);
 
