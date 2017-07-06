@@ -33,7 +33,9 @@ public void showImage(int index){
     QImage image;
     ArrayList<QImage> arrayList = new ArrayList<>();
 
-    image = new QImage();
+    // QImage 中filePath 可以是 URL, 也可以是本地图片绝对路径
+    
+    image = new QImage();
     image.srcImageView = (PhotoView) findViewById(R.id.image10);
     arrayList.add(image);
 
