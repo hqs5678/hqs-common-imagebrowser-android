@@ -241,7 +241,6 @@ public class ImageBrowser {
         private void addAnimationEnter(RectF rectF, ImageView srcImgView){
             final PhotoView imageView = new PhotoView(this);
             imageView.setImageDrawable(srcImgView.getDrawable());
-            imageView.setBackground(srcImgView.getBackground());
             imageView.setScaleType(scaleType);
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) sw, (int) sh);
