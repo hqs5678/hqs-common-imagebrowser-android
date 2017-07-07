@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version = '1.1.18'
-def vc = 32
+version = '1.1.19'
+def vc = 33
 
 
 android {
