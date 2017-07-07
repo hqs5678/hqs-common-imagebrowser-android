@@ -9,7 +9,6 @@ import com.bumptech.glide.Glide;
 import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.helper.imagebrowser.QImage;
 import com.hqs.common.utils.Log;
-import com.hqs.common.utils.SDCardUtils;
 import com.hqs.common.utils.ScreenUtils;
 import com.wenming.library.LogReport;
 import com.wenming.library.save.imp.CrashWriter;
@@ -113,16 +112,7 @@ public class MainActivity extends AppCompatActivity {
             else if (view.getId() == R.id.image20){
                 showImg1(10);
             }
-        } else {
-            ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
-            ArrayList<String> filePaths = new ArrayList<>();
-            filePaths.add("http://d.hiphotos.baidu.com/image/pic/item/10dfa9ec8a136327a1de913a938fa0ec08fac78c.jpg");
-
-            filePaths.add(SDCardUtils.getSDCardPath() + "000.jpg");
-            ImageBrowser.show(MainActivity.this, filePaths, 0);
         }
-
-
     }
 
     private void showImg(int index){

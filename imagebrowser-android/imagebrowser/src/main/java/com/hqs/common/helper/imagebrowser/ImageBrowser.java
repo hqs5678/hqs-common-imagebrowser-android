@@ -54,30 +54,6 @@ public class ImageBrowser {
     private static ArrayList<QImage> images;
     public static final int TOUCH_OFFSET = 40;
 
-    /**
-     * show
-     * @param filePaths         文件路径 或 url
-     * @param currentIndex      当前显示的图片
-     */
-    public static void show(Activity activity, final ArrayList<String> filePaths, final int currentIndex){
-
-        if (placeHolderImageRes == -1){
-            Toast.makeText(activity, "请设置占位图", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (filePaths != null && filePaths.size() > 0 && activity != null){
-
-            Intent intent = new Intent(activity, ImageActivity.class);
-            intent.putExtra("filePaths", filePaths);
-            intent.putExtra("currentIndex", currentIndex);
-
-            activity.startActivity(intent);
-            activity.overridePendingTransition(0, 0);
-        }
-    }
-
-
     public static void showWithImages(Activity activity, final ArrayList<QImage> images, final int currentIndex){
 
         if (placeHolderImageRes == -1){
