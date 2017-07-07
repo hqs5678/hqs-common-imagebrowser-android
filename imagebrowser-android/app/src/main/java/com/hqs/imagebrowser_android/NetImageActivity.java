@@ -33,7 +33,7 @@ public class NetImageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_net_image);
 
         final String[] files = getFiles();
- 
+
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
