@@ -1,6 +1,6 @@
 package com.hqs.common.helper.imagebrowser;
 
-import com.bm.library.PhotoView;
+import android.widget.ImageView;
 
 /**
  * Created by super on 2017/1/21.
@@ -11,10 +11,10 @@ public class QImage{
     /**
      * source image view
      */
-    public PhotoView srcImageView;
+    public ImageView srcImageView;
 
     /**
      * file path or url
      */
-    public String filePath;
+    public String filePathOrUrl;
 }

@@ -23,7 +23,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <com.bm.library.PhotoView
+    <ImageView
         android:id="@+id/imageView0"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -34,7 +34,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <com.bm.library.PhotoView
+    <ImageView
         android:id="@+id/imageView1"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -46,7 +46,7 @@
         android:layout_marginLeft="12dp"
         android:layout_marginStart="12dp" />
 
-    <com.bm.library.PhotoView
+    <ImageView
         android:id="@+id/image3"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -58,7 +58,7 @@
         android:layout_marginRight="14dp"
         android:layout_marginEnd="14dp" />
 
-    <com.bm.library.PhotoView
+    <ImageView
         android:id="@+id/image2"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -82,77 +82,77 @@
             android:layout_height="match_parent"
             android:orientation="horizontal" >
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image10"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a1" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image11"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a2" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image12"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a3" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image13"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a4" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image14"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a5" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image15"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a6" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image16"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a7" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image17"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a8" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image18"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a9" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image19"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:onClick="onClick"
                 android:src="@mipmap/a10" />
 
-            <com.bm.library.PhotoView
+            <ImageView
                 android:id="@+id/image20"
                 android:layout_width="100dp"
                 android:layout_height="100dp"

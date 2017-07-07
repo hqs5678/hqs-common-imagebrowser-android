@@ -3,8 +3,8 @@ package com.hqs.imagebrowser_android;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ImageView;
 
-import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
 import com.hqs.common.helper.imagebrowser.ImageBrowser;
 import com.hqs.common.helper.imagebrowser.QImage;
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Glide.with(this).load("https://www.7x24home.com:8889/upload/pics/beijing/2017/06/19/WX20170420657648SM657685test/f751332f-4ad1-4d40-ba95-f910f8ea10e0/2017-06-19-104805418574.png")
-                .into((PhotoView) findViewById(R.id.imageView0));
+                .into((ImageView) findViewById(R.id.imageView0));
 
         LogReport.getInstance()
                 .setCacheSize(30 * 1024 * 1024)//支持设置缓存大小，超出后清空
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClick(View view) {
 
-        if (view instanceof PhotoView) {
+        if (view instanceof ImageView) {
             if (view.getId() == R.id.image2){
                 showImg(2);
             }
@@ -133,21 +133,21 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<QImage> arrayList = new ArrayList<>();
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.imageView0);
+        image.srcImageView = (ImageView) findViewById(R.id.imageView0);
 
-        image.filePath = "https://www.7x24home.com:8889/upload/pics/beijing/2017/06/19/WX20170420657648SM657685test/f751332f-4ad1-4d40-ba95-f910f8ea10e0/2017-06-19-104805418574.png";
+        image.filePathOrUrl = "https://www.7x24home.com:8889/upload/pics/beijing/2017/06/19/WX20170420657648SM657685test/f751332f-4ad1-4d40-ba95-f910f8ea10e0/2017-06-19-104805418574.png";
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.imageView1);
+        image.srcImageView = (ImageView) findViewById(R.id.imageView1);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image2);
+        image.srcImageView = (ImageView) findViewById(R.id.image2);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image3);
+        image.srcImageView = (ImageView) findViewById(R.id.image3);
         arrayList.add(image);
 
         ImageBrowser.animDuration = 200;
@@ -164,47 +164,47 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<QImage> arrayList = new ArrayList<>();
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image10);
+        image.srcImageView = (ImageView) findViewById(R.id.image10);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image11);
+        image.srcImageView = (ImageView) findViewById(R.id.image11);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image12);
+        image.srcImageView = (ImageView) findViewById(R.id.image12);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image13);
+        image.srcImageView = (ImageView) findViewById(R.id.image13);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image14);
+        image.srcImageView = (ImageView) findViewById(R.id.image14);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image15);
+        image.srcImageView = (ImageView) findViewById(R.id.image15);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image16);
+        image.srcImageView = (ImageView) findViewById(R.id.image16);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image17);
+        image.srcImageView = (ImageView) findViewById(R.id.image17);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image18);
+        image.srcImageView = (ImageView) findViewById(R.id.image18);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image19);
+        image.srcImageView = (ImageView) findViewById(R.id.image19);
         arrayList.add(image);
 
         image = new QImage();
-        image.srcImageView = (PhotoView) findViewById(R.id.image20);
+        image.srcImageView = (ImageView) findViewById(R.id.image20);
         arrayList.add(image);
 
         ImageBrowser.showWithImages(this, arrayList, index);

@@ -145,7 +145,7 @@ public class ImageBrowser {
             if (filePaths == null && images != null) {
                 filePaths = new ArrayList<>();
                 for (QImage image : images){
-                    filePaths.add(image.filePath);
+                    filePaths.add(image.filePathOrUrl);
                 }
             }
 
@@ -187,7 +187,7 @@ public class ImageBrowser {
 
             // 先完成动画, 再显示所有, 设置viewpager
             if (images != null && images.size() > 0) {
-                final PhotoView imgView = images.get(currentIndex).srcImageView;
+                final ImageView imgView = images.get(currentIndex).srcImageView;
                 ViewUtil.getViewRect(imgView, new ViewUtil.OnViewRectCallBack() {
                     @Override
                     public void onRect(final RectF rectF) {
@@ -227,9 +227,21 @@ public class ImageBrowser {
 
         }
 
-        private void addAnimationEnter(RectF rectF, PhotoView srcImgView){
+        private void setValueForInfo(Info info, String key, Object value){
+            try {
+                Class cls = info.getClass();
+                Field f = cls.getDeclaredField(key);
+                f.setAccessible(true);
+                f.set(info, value);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void addAnimationEnter(RectF rectF, ImageView srcImgView){
             final PhotoView imageView = new PhotoView(this);
             imageView.setImageDrawable(srcImgView.getDrawable());
+            imageView.setBackground(srcImgView.getBackground());
             imageView.setScaleType(scaleType);
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) sw, (int) sh);
@@ -237,17 +249,12 @@ public class ImageBrowser {
 
             contentView.addView(imageView);
 
-            Info info = srcImgView.getInfo();
-
-            try {
-                Class cls = info.getClass();
-                Field f = cls.getDeclaredField("mRect");
-                f.setAccessible(true);
-                f.set(info, rectF);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            Info info = imageView.getInfo();
+            setValueForInfo(info, "mRect", rectF);
+            setValueForInfo(info, "mImgRect", rectF);
+            setValueForInfo(info, "mBaseRect", rectF);
+            setValueForInfo(info, "mWidgetRect", rectF);
+            setValueForInfo(info, "mScaleType", srcImgView.getScaleType());
 
             imageView.setAnimaDuring(animDuration);
             imageView.animaFrom(info);
