@@ -63,7 +63,7 @@ public class LocalImageActivity extends AppCompatActivity {
 
                         for (int i = 0; i < files.size(); i++) {
                             QImage qImage = new QImage();
-                            qImage.filePathOrUrl = files.get(position);
+                            qImage.filePathOrUrl = files.get(i);
 
                             if(i == position){
                                 qImage.srcImageView = (ImageView) v;
@@ -134,7 +134,7 @@ public class LocalImageActivity extends AppCompatActivity {
     }
 
 
-    class MyViewHolder extends RecyclerView.ViewHolder{
+    public static class MyViewHolder extends RecyclerView.ViewHolder{
 
         ImageView imageView;
         public MyViewHolder(View itemView) {
