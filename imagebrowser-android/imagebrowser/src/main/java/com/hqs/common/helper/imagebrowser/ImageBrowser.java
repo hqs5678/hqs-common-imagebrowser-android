@@ -54,6 +54,13 @@ public class ImageBrowser {
     private static ArrayList<QImage> images;
     public static final int TOUCH_OFFSET = 40;
 
+    /**
+     * 开始浏览图片
+     *
+     * @param activity
+     * @param images
+     * @param currentIndex
+     */
     public static void showWithImages(Activity activity, final ArrayList<QImage> images, final int currentIndex){
 
         if (placeHolderImageRes == -1){
@@ -76,7 +83,6 @@ public class ImageBrowser {
 
     public static class ImageActivity extends Activity {
 
-        private ArrayList<String> filePaths;
         private int currentIndex;
         private ContentView contentView;
         private RelativeLayout bgView;
@@ -115,15 +121,7 @@ public class ImageBrowser {
             dismissOffset = (int) (sw * 0.3);
 
             mHandler = new Handler();
-            filePaths = extras.getStringArrayList("filePaths");
             currentIndex = extras.getInt("currentIndex");
-
-            if (filePaths == null && images != null) {
-                filePaths = new ArrayList<>();
-                for (QImage image : images){
-                    filePaths.add(image.filePathOrUrl);
-                }
-            }
 
             contentView = (ContentView) LayoutInflater.from(this).inflate(R.layout.dialog_photo_browser, null);
             contentView.setEnabled(false);
@@ -134,7 +132,7 @@ public class ImageBrowser {
             this.setContentView(contentView);
 
             tvIndex = (TextView) contentView.findViewById(R.id.tv_index);
-            tvIndex.setText(currentIndex + 1 + "/" + filePaths.size());
+            tvIndex.setText(currentIndex + 1 + "/" + images.size());
             viewPager = (ViewPager) contentView.findViewById(R.id.viewPager);
 
             contentView.setInterceptListener(new InterceptListener() {
@@ -288,7 +286,7 @@ public class ImageBrowser {
 
                 @Override
                 public void onPageSelected(int position) {
-                    tvIndex.setText(position + 1 + "/" + filePaths.size());
+                    tvIndex.setText(position + 1 + "/" + images.size());
                     currentIndex = position;
                 }
 
@@ -685,7 +683,7 @@ public class ImageBrowser {
 
             @Override
             public int getCount() {
-                return filePaths.size();
+                return images.size();
             }
 
             @Override
@@ -705,20 +703,22 @@ public class ImageBrowser {
                     photoView = getView();
                 }
 
-                String path = filePaths.get(position);
-                if (images == null){
-                    Glide.with(ImageActivity.this)
-                            .load(path)
-                            .dontAnimate()
-                            .placeholder(placeHolderImageRes)
-                            .into(photoView);
-                }
-                else{
-                    Glide.with(ImageActivity.this)
-                            .load(path)
-                            .dontAnimate()
-                            .placeholder(images.get(position).srcImageView.getDrawable())
-                            .into(photoView);
+                String path = images.get(position).filePathOrUrl;
+                if (path != null){
+                    if (images.get(position).srcImageView == null){
+                        Glide.with(ImageActivity.this)
+                                .load(path)
+                                .dontAnimate()
+                                .placeholder(placeHolderImageRes)
+                                .into(photoView);
+                    }
+                    else{
+                        Glide.with(ImageActivity.this)
+                                .load(path)
+                                .dontAnimate()
+                                .placeholder(images.get(position).srcImageView.getDrawable())
+                                .into(photoView);
+                    }
                 }
 
                 container.addView(photoView);
