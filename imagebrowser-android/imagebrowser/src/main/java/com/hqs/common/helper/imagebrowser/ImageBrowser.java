@@ -57,9 +57,19 @@ public class ImageBrowser {
     /**
      * 开始浏览图片
      *
-     * @param activity
-     * @param images
-     * @param currentIndex
+     * @param activity 当前activity
+     * @param images  将要浏览的图片的集合
+     *
+     *                QImage 说明:
+     *                srcImageView: 源ImageView控件
+     *                filePathOrUrl: 图片的路径或URL
+     *                在filePathOrUrl 不为 null 时, 优先显示filePathOrUrl
+     *                注意:
+     *                首先将要显示的image 的 srcImageView为必填!!!!
+     *
+     * @param currentIndex 首先显示的图片的index
+     *
+     *
      */
     public static void showWithImages(Activity activity, final ArrayList<QImage> images, final int currentIndex){
 
