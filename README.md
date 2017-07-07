@@ -17,8 +17,9 @@
 -keep class com.bm.library.** {*;}
 ```
 
-##### 使用方法, 以RecyclerView的adapter为例, 相信代码请查看Demo
+##### 使用方法, 以RecyclerView的adapter为例, 详情请查看Demo, 以下为核心代码
 ```
+
 @Override
 public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
@@ -29,7 +30,9 @@ public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position)
         @Override
         public void onClick(View v) {
 
-            ArrayList<QImage> imgs = new ArrayList<>();
+            // 生成图片源数据
+            
+            ArrayList<QImage> imgs = new ArrayList<>();
 
             for (int i = 0; i < files.size(); i++) {
                 QImage qImage = new QImage();
@@ -41,12 +44,15 @@ public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position)
 
                 imgs.add(qImage);
             }
-
-            ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
-            ImageBrowser.showWithImages(LocalImageActivity.this, imgs, position);
+            
+            // 设置占位图片
+            ImageBrowser.placeHolderImageRes = R.mipmap.ic_launcher;
+            // 开始浏览图片
+            ImageBrowser.showWithImages(LocalImageActivity.this, imgs, position);
 
         }
     });
 }
+
 
 ```
